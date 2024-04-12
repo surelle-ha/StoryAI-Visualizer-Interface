@@ -6,13 +6,15 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref  } from 'vue';
   import { useStoryStore } from '@/stores/storyStore';
-  
+  import { useToast } from "primevue/usetoast";
+
   const emit = defineEmits(['sceneInitialized']);
   
   const storyStore = useStoryStore();
-  
+  const toast = useToast();
+
   const newScene = async () => {
     console.log('New Scene function called');
   
@@ -32,15 +34,17 @@
       });
   
       if (!response.ok) {
+        toast.add({ severity: 'error', summary: 'Failed', detail: 'Error during scene creation.', life: 3000 });
         throw new Error('Failed to initialize new scene');
       }
   
       const data = await response.json();
-      console.log('Scene initialized:', data);
+      toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully added scene.', life: 3000 });
   
       emit('sceneInitialized', data);
     } catch (error) {
       console.error('Error during scene initialization:', error);
+      toast.add({ severity: 'error', summary: 'Failed', detail: 'Error during scene creation.', life: 3000 });
     }
   };
   

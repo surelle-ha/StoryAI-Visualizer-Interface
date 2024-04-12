@@ -1,4 +1,5 @@
 <template>
+    <Toast />
 	<Navbar />
 	<router-view />
 </template>

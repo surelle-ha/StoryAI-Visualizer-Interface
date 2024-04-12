@@ -5,6 +5,7 @@ import "primeicons/primeicons.css";
 
 import { createApp } from "vue";
 import { createPinia } from 'pinia';
+import mitt from 'mitt'
 import App from "./App.vue";
 import router from './router';
 import PrimeVue from "primevue/config";
@@ -118,6 +119,7 @@ import VirtualScroller from 'primevue/virtualscroller';
 import Editor from 'primevue/editor';
 
 const app = createApp(App);
+const emitter = mitt()
 const pinia = createPinia();
 
 app.use(PrimeVue, { ripple: true  });
@@ -234,5 +236,5 @@ app.component('TreeTable', TreeTable);
 app.component('TriStateCheckbox', TriStateCheckbox);
 app.component('VirtualScroller', VirtualScroller);
 
-
+app.provide('emitter', emitter); 
 app.mount("#app");

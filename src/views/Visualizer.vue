@@ -1,13 +1,13 @@
 <template>
 	<div class="container p-5">
-		<div class="cards-container" v-if="sceneCount">
-			<ChapterItemCard v-for="i in sceneCount" :key="i" :scenario="{scene_id:i}" />
+		<div class="cards-container" v-if="scenes.length">
+			<ChapterItemCard v-for="scene in scenes" :key="(scene.id).replace('Scene_', '')" :scenario="scene.id" />
 		</div>
 		<div class="cards-container" v-else>
 			<Message severity="warn" :closable="false">No Scenario Found</Message>
 		</div>
 
-		<FloatMenu class="FloatMenu" @sceneInitialized="fetchSceneCount"/>
+		<FloatMenu class="FloatMenu" @sceneInitialized="fetchScenes"/>
 	</div>
 </template>
 
@@ -15,8 +15,9 @@
 import ChapterItemCard from "../components/ChapterItemCard.vue";
 import FloatMenu from "../components/FloatMenu.vue";
 import Spinner from "../components/Spinner.vue";
-import { ref, onMounted } from "vue";
+import { inject, ref, onMounted } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
+import { useToast } from "primevue/usetoast";
 
 export default {
 	name: "Visualizer",
@@ -26,40 +27,52 @@ export default {
 		Spinner
 	},
 	setup() {
+		const emitter = inject('emitter');
 		const storyStore = useStoryStore();
-		const sceneCount = ref(null);
+  		const toast = useToast();
+		const scenes = ref([]);
 
 		const story_id = storyStore.story_id;
 		const chapter_id = storyStore.chapter_id;
 
-		const fetchSceneCount = async () => {
+		const fetchScenes = async () => {
 			const params = new URLSearchParams({ story_id, chapter_id }).toString();
 			const url = `http://localhost:80/api/scenario/getCount?${params}`;
 			try {
 				const response = await fetch(url);
 				if (!response.ok) {
+        			toast.add({ severity: 'error', summary: 'Failed', detail: 'Something went wrong.', life: 3000 });
 					throw new Error(`Network response was not ok (status: ${response.status})`);
 				}
 				const data = await response.json();
 				if (data.status === 'success') {
-					sceneCount.value = data.sceneCount;
+					scenes.value = data.scenes.sort((a, b) => {
+						let numA = parseInt(a.id.replace('Scene_', ''));
+						let numB = parseInt(b.id.replace('Scene_', ''));
+						return numA - numB;
+					});
 				} else {
 					console.error('Failed to fetch data:', data.message);
+        			toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to retrieve scenes.', life: 3000 });
 				}
 			} catch (error) {
 				console.error('Error fetching data:', error.message);
+        			toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to retrieve scenes.', life: 3000 });
 			}
 		}
 
-		onMounted(fetchSceneCount);
+		onMounted(fetchScenes);
+
+		emitter.on('fetchScenes', fetchScenes);
 
 		return {
-			sceneCount,
-			fetchSceneCount
+			scenes,
+			fetchScenes
 		};
 	}
 };
 </script>
+
 
 <style scoped>
 .cards-container {
