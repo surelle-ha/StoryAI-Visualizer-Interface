@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: story-visualizer
+    runtime: node
+    repo: https://github.com/surelle-ha/StoryAI-Visualizer-Interface
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm run serve
