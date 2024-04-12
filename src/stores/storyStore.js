@@ -23,7 +23,7 @@ export const useStoryStore = defineStore('storyStore', {
         },
         async initializeStory(storyId, chapterId) {
             try {
-                const response = await axios.post('http://localhost:80/api/story/initialize', {
+                const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
                     story_id: storyId,
                     chapter_id: chapterId
                 });

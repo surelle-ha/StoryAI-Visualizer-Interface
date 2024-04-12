@@ -52,7 +52,7 @@ export default {
 
         const fetchSceneContent = async () => {
             try {
-                const response = await axios.post('http://localhost:80/api/scenario/content/fetch', {
+                const response = await axios.post(`${process.env.BACKEND_API_URL}/api/scenario/content/fetch`, {
                     story_id: storyStore.story_id,
                     chapter_id: storyStore.chapter_id,
                     scene_id: scene
@@ -66,7 +66,7 @@ export default {
 
         const fetchScenePrompt = async () => {
             try {
-                const response = await axios.post('http://localhost:80/api/scenario/prompt/fetch', {
+                const response = await axios.post(`${process.env.BACKEND_API_URL}/api/scenario/prompt/fetch`, {
                     story_id: storyStore.story_id,
                     chapter_id: storyStore.chapter_id,
                     scene_id: scene

@@ -18,7 +18,7 @@
   const newScene = async () => {
     console.log('New Scene function called');
   
-    const url = 'http://localhost:80/api/scenario/initialize';
+    const url = `${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/initialize`;
     const payload = {
       story_id: storyStore.story_id,
       chapter_id: storyStore.chapter_id

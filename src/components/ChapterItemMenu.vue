@@ -24,7 +24,6 @@
             <span class="p-text-secondary block mb-5">AI Prompt are optional details that will be provided to the AI Model upon image creation.</span>
             <div class="flex align-items-center gap-3 mb-3">
                 <Editor id="scenario_prompt" v-model="scenario_prompt" placeholder="Prompt" editorStyle="height: 320px" />
-                {{ scenario_prompt }}
             </div>
             <div class="flex justify-content-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayEditPrompt = !displayEditPrompt"></Button>
@@ -84,7 +83,7 @@ const scenario_prompt = ref('Describe the characters, their attributes and the l
 
 const saveSceneContent = async () => {
   try {
-    const response = await axios.post('http://localhost:80/api/scenario/content/save', {
+    const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/content/save`, {
       story_id: storyStore.story_id,
       chapter_id: storyStore.story_id,
       scene_id: props.scene_id,
@@ -101,7 +100,7 @@ const saveSceneContent = async () => {
 
 const saveScenePrompt = async () => {
   try {
-    const response = await axios.post('http://localhost:80/api/scenario/prompt/save', {
+    const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/prompt/save`, {
       story_id: storyStore.story_id,
       chapter_id: storyStore.story_id,
       scene_id: props.scene_id,
@@ -125,7 +124,7 @@ const deleteScene = async () => {
         rejectLabel: 'Cancel',
         acceptLabel: 'Save',
         accept: () => {
-            axios.delete('http://localhost:80/api/scenario/delete', {
+            axios.delete(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/delete`, {
             data: {
                 story_id: storyStore.story_id,
                 chapter_id: storyStore.story_id,
@@ -156,7 +155,7 @@ const saveSceneFreeNarrate = async () => {
         acceptLabel: 'Yes',
         accept: async () => {
             try {
-                const response = await axios.post('http://localhost:80/api/scene/narrate/free/create', {
+                const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scene/narrate/free/create`, {
                 story_id: storyStore.story_id, 
                 chapter_id: storyStore.chapter_id,
                 scene_id: props.scene_id
@@ -189,7 +188,7 @@ const fetchVoices = async () => {
     loading.value = true;
     error.value = null;
     try {
-        const response = await axios.get('http://localhost:80/api/scenario/narrate/premium/voices');
+        const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/premium/voices`);
         voices.value = response.data.map(voice => ({
             ...voice,
             label: `${voice.name} (${voice.language}) - ${voice.accent}`, 

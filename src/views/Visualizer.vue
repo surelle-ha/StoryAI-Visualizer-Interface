@@ -37,7 +37,7 @@ export default {
 
 		const fetchScenes = async () => {
 			const params = new URLSearchParams({ story_id, chapter_id }).toString();
-			const url = `http://localhost:80/api/scenario/getCount?${params}`;
+			const url = `${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/getCount?${params}`;
 			try {
 				const response = await fetch(url);
 				if (!response.ok) {
