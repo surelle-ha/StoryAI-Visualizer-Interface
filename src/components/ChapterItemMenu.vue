@@ -6,7 +6,7 @@
         <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
         <Dialog v-model:visible="displayEditContent" :modal="true" header="Edit Scenario" :style="{ width: '40rem' }">
-            <span class="p-text-secondary block mb-5">Scenario Details is needed to generate Image and Narration.</span>
+            <span class="p-text-secondary block mb-5">Scenario content is the text version that will be displayed on Visualizer Mode.</span>
             <div class="flex align-items-center gap-3 mb-3" v-if="previewEditor">
                 <Editor id="scenario_content" v-model="scenario_content" placeholder="Content" editorStyle="height: 320px" />
             </div>
@@ -21,9 +21,9 @@
         </Dialog>
 
         <Dialog v-model:visible="displayEditPrompt" :modal="true" header="Edit AI Prompt" :style="{ width: '40rem' }">
-            <span class="p-text-secondary block mb-5">AI Prompt are optional details that will be provided to the AI Model upon image creation.</span>
+            <span class="p-text-secondary block mb-5">Just copy and paste the scenario content here. This is needed to generate Image and Narration</span>
             <div class="flex align-items-center gap-3 mb-3">
-                <Editor id="scenario_prompt" v-model="scenario_prompt" placeholder="Prompt" editorStyle="height: 320px" />
+                <Textarea id="scenario_prompt" v-model="scenario_prompt" placeholder="Prompt" rows="5" cols="30" style="width: 100%" />
             </div>
             <div class="flex justify-content-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayEditPrompt = !displayEditPrompt"></Button>
@@ -55,7 +55,7 @@
 
             <div class="flex justify-content-end gap-2 mt-4">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayPremiumNarration = !displayPremiumNarration"></Button>
-                <Button type="button" label="Save" @click="displayPremiumNarration = !displayPremiumNarration"></Button>
+                <Button type="button" label="Save" @click="saveScenePremiumNarrate"></Button>
             </div>
         </Dialog>
 
@@ -76,10 +76,12 @@ const toast = useToast();
 const props = defineProps({
     scene_id: Number,
     scene_content: String,
+    scene_prompt: String,
+    scene_withAudio: Boolean
 })
 
 const scenario_content = ref('');
-const scenario_prompt = ref('Describe the characters, their attributes and the location settings here.');
+const scenario_prompt = ref('Once upon a time, ...');
 
 const saveSceneContent = async () => {
   try {
@@ -155,7 +157,7 @@ const saveSceneFreeNarrate = async () => {
         acceptLabel: 'Yes',
         accept: async () => {
             try {
-                const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scene/narrate/free/create`, {
+                const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/free/create`, {
                 story_id: storyStore.story_id, 
                 chapter_id: storyStore.chapter_id,
                 scene_id: props.scene_id
@@ -173,11 +175,49 @@ const saveSceneFreeNarrate = async () => {
             }
         },
         reject: () => {
-            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Scene deletion cancelled', life: 3000 });
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Narrate Generation Cancelled', life: 3000 });
         }
     });
 };
 
+const saveScenePremiumNarrate = async () => {
+    if (!selectedvoice.value) {
+        toast.add({ severity: 'warn', summary: 'No Voice Selected', detail: 'Please select a voice before generating narration.', life: 3000 });
+        return;
+    }
+    confirm.require({
+        message: 'Are you sure you want to generate narration using the selected AI voice?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            try {
+                const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/premium/create`, {
+                    story_id: storyStore.story_id, 
+                    chapter_id: storyStore.chapter_id,
+                    scene_id: props.scene_id,
+                    voiceId: selectedvoice.value.id // Ensure this matches the data structure of the selected voice
+                });
+                emitter.emit('fetchScenes', response);
+                displayPremiumNarration.value = !displayPremiumNarration.value;
+                toast.add({ severity: 'success', summary: 'Premium Narration Generated', detail: 'Narration using AI successfully generated.', life: 3000 });
+            } catch (error) {
+                console.error('Error generating narration:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Something went wrong!',
+                    detail: 'Failed to generate narration: ' + (error.response ? error.response.data.message : error.message),
+                    life: 3000
+                });
+            }
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Narration generation cancelled', life: 3000 });
+        }
+    });
+};
 
 const selectedvoice = ref();
 const voices = ref([]);
@@ -210,9 +250,6 @@ const playVoiceSample = (sampleUrl) => {
     currentAudio.value.play().catch(error => console.error('Error playing the audio:', error));
 };
 
-
-
-
 const menu = ref();
 const items = ref([
     {
@@ -240,11 +277,13 @@ const items = ref([
         items: [
             {
                 label: 'Generate AI Image',
-                icon: 'pi pi-image'
+                icon: 'pi pi-image',
+                disabled: props.scene_prompt == 'No AI Prompt Available'
             },
             {
                 label: 'Search Google Image',
-                icon: 'pi pi-google'
+                icon: 'pi pi-google',
+                disabled: props.scene_prompt == 'No AI Prompt Available'
             },
             {
                 label: 'Select From Local',
@@ -263,16 +302,19 @@ const items = ref([
             {
                 label: 'Generate Free AI Narration',
                 icon: 'pi pi-volume-up',
-                command: saveSceneFreeNarrate
+                command: saveSceneFreeNarrate,
+                disabled: props.scene_prompt == 'No AI Prompt Available'
             },
             {
                 label: 'Generate Premium AI Narration',
                 icon: 'pi pi-star',
-                command: () => { displayPremiumNarration.value = true; }
+                command: () => { displayPremiumNarration.value = true; },
+                disabled: props.scene_prompt == 'No AI Prompt Available'
             },
             {
                 label: 'Clear Narration',
-                icon: 'pi pi-trash'
+                icon: 'pi pi-trash',
+                disabled: !props.scene_withAudio
             }
         ]
     },
@@ -280,8 +322,9 @@ const items = ref([
 
 onMounted(() => {
     fetchVoices();
-
+    console.log(props.scene_prompt)
     scenario_content.value = props.scene_content;
+    scenario_prompt.value = props.scene_prompt;
 })
 
 const displayEditContent = ref(false);
