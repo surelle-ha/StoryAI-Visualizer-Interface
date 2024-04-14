@@ -2,7 +2,7 @@
   <div class="card flex justify-content-center align-items-center" style="height: 100vh;">
     <Button label="Story Selector" @click="openDialog" />
     <Dialog v-model:visible="visible" modal header="Story Visualizer" :style="{ width: '25rem' }">
-      <span class="p-text-secondary block mb-5">Warning: You're seeing this modal because you didn't come from the actual home page.</span>
+      <span class="p-text-secondary block mb-5">Warning: This modal has appeared because you did not access it from the actual home page. Please fill out the form below to test the Story Visualizer.</span>
       
       <div v-if="loading" class="center-spinner">
         <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="var(--surface-ground)"
@@ -25,8 +25,8 @@
         </div>
 
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="isGuest">Enter as Guest</label>
-          <InputSwitch inputId="isGuest" v-model="isGuest" />
+          <label for="isAuthor">Enter as Author</label>
+          <InputSwitch inputId="isAuthor" v-model="isAuthor" />
         </div>
 
         <div class="flex justify-content-end gap-2">
@@ -42,21 +42,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useStoryStore } from '../stores/storyStore';
 import { useToast } from "primevue/usetoast";
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
-const story_name = ref('The Three Little Pigs');
-const story_id = ref(1);
-const chapter_id = ref(1);
-const isGuest = ref(true);
+const story_name = ref('');
+const story_id = ref(null);
+const chapter_id = ref(null);
+const isAuthor = ref(true);
 
 const toast = useToast();
 const visible = ref(true);
 const loading = ref(false); // State to control spinner visibility
 const storyStore = useStoryStore();
 const router = useRouter()
+const route = useRoute()
 
 function openDialog() {
   visible.value = true;
@@ -65,6 +66,13 @@ function openDialog() {
 function closeDialog() {
   visible.value = false;
 }
+
+onMounted(() => {
+    story_name.value = route.query.story_name || 'The Three Little Pigs'
+    story_id.value = route.query.story_id || 1
+    chapter_id.value = route.query.chapter_id || 1
+    isAuthor.value = route.query.isAuthor === 'true'
+})
 
 async function sendData() {
   loading.value = true; // Activate spinner before sending data
