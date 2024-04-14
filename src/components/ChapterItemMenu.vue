@@ -2,7 +2,25 @@
 <template>
     <ConfirmDialog></ConfirmDialog>
     <div class="card flex justify-content-center">
-        <Button type="button" icon="pi pi-cog" label="Manage" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu" />
+        
+        <Dialog v-model:visible="isLoading" closable="false" modal :pt="{
+            root: {
+                style: 'border:none;'
+            },
+            mask: {
+                style: 'backdrop-filter: blur(2px)'
+            },
+            closeButton: {
+                style: 'display: none'
+            },
+        }">
+            <span class="p-text-secondary block mb-5">We are processing your request.</span>
+            <div class="flex align-items-center gap-3 mb-3">
+                <ProgressSpinner style="width: 50px; height: 50px;" strokeWidth="8" fill="#EEEEEE" animationDuration=".5s"></ProgressSpinner>
+            </div>
+        </Dialog>
+
+        <Button type="button" icon="pi pi-cog" label="Manage" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"/>
         <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
         <Dialog v-model:visible="displayEditContent" :modal="true" header="Edit Scenario" :style="{ width: '40rem' }">
@@ -79,42 +97,52 @@ const props = defineProps({
     scene_prompt: String,
     scene_withAudio: Boolean
 })
+const isLoading = ref(false)
 
 const scenario_content = ref('');
 const scenario_prompt = ref('Once upon a time, ...');
 
 const saveSceneContent = async () => {
-  try {
-    const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/content/save`, {
-      story_id: storyStore.story_id,
-      chapter_id: storyStore.story_id,
-      scene_id: props.scene_id,
-      scene_content: scenario_content.value
-    });
-    emitter.emit('fetchScenes', response);
-    displayEditContent.value = !displayEditContent.value
-    toast.add({ severity: 'success', summary: 'Content Updated', detail: 'You updated a scenario.', life: 3000 });
-  } catch (error) {
-    console.error('Error saving the scene:', error);
-    toast.add({ severity: 'error', summary: 'Something went wrong!', detail: 'Failed to save scene: ' + (error.response ? error.response.data.message : error.message), life: 3000 });
-  }
+    isLoading.value = true;
+    try {
+        const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/content/save`, {
+        story_id: storyStore.story_id,
+        chapter_id: storyStore.story_id,
+        scene_id: props.scene_id,
+        scene_content: scenario_content.value
+        });
+        emitter.emit('updateSceneCard', response);
+        displayEditContent.value = !displayEditContent.value
+        toast.add({ severity: 'success', summary: 'Content Updated', detail: 'You updated a scenario.', life: 3000 });
+    } catch (error) {
+        console.error('Error saving the scene:', error);
+        toast.add({ severity: 'error', summary: 'Something went wrong!', detail: 'Failed to save scene: ' + (error.response ? error.response.data.message : error.message), life: 3000 });
+    }
+    setTimeout(() => {
+        isLoading.value = false;
+    }, 1000); 
 };
 
 const saveScenePrompt = async () => {
-  try {
-    const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/prompt/save`, {
-      story_id: storyStore.story_id,
-      chapter_id: storyStore.story_id,
-      scene_id: props.scene_id,
-      scene_prompt: scenario_prompt.value
+    isLoading.value = true;
+    await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/prompt/save`, {
+        story_id: storyStore.story_id,
+        chapter_id: storyStore.story_id,
+        scene_id: props.scene_id,
+        scene_prompt: scenario_prompt.value
+    })
+    .then(response => {
+        emitter.emit('updateSceneCard', response);
+        displayEditPrompt.value = !displayEditPrompt.value
+        toast.add({ severity: 'success', summary: 'Prompt Updated', detail: 'You updated a scenario AI prompt.', life: 3000 });
+    })
+    .catch(error => {
+        console.error('Error saving the scene:', error);
+        toast.add({ severity: 'error', summary: 'Something went wrong!', detail: 'Failed to save prompt: ' + (error.response ? error.response.data.message : error.message), life: 3000 });
     });
-    emitter.emit('fetchScenes', response);
-    displayEditPrompt.value = !displayEditPrompt.value
-    toast.add({ severity: 'success', summary: 'Prompt Updated', detail: 'You updated a scenario AI prompt.', life: 3000 });
-  } catch (error) {
-    console.error('Error saving the scene:', error);
-    toast.add({ severity: 'error', summary: 'Something went wrong!', detail: 'Failed to save prompt: ' + (error.response ? error.response.data.message : error.message), life: 3000 });
-  }
+    setTimeout(() => {
+        isLoading.value = false;
+    }, 1000); 
 };
 
 const deleteScene = async () => {
@@ -126,19 +154,26 @@ const deleteScene = async () => {
         rejectLabel: 'Cancel',
         acceptLabel: 'Save',
         accept: () => {
+            isLoading.value = true;
             axios.delete(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/delete`, {
-            data: {
-                story_id: storyStore.story_id,
-                chapter_id: storyStore.story_id,
-                scene_id: props.scene_id
-            }
+                data: {
+                    story_id: storyStore.story_id,
+                    chapter_id: storyStore.story_id,
+                    scene_id: props.scene_id
+                }
             })
             .then(response => {
-                emitter.emit('fetchScenes', response);
-                toast.add({ severity: 'info', summary: 'Deleted', detail: 'You deleted a scenario.', life: 3000 });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    emitter.emit('updateSceneCard', response);
+                    toast.add({ severity: 'info', summary: 'Deleted', detail: 'You deleted a scenario.', life: 3000 });
+                }, 1000); 
             })
             .catch(error => {
-                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error, life: 3000 });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error, life: 3000 });
+                }, 1000); 
             });
         },
         reject: () => {
@@ -156,22 +191,29 @@ const saveSceneFreeNarrate = async () => {
         rejectLabel: 'No',
         acceptLabel: 'Yes',
         accept: async () => {
+            isLoading.value = true;
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/free/create`, {
-                story_id: storyStore.story_id, 
-                chapter_id: storyStore.chapter_id,
-                scene_id: props.scene_id
+                    story_id: storyStore.story_id, 
+                    chapter_id: storyStore.chapter_id,
+                    scene_id: props.scene_id
                 });
-                emitter.emit('fetchScenes', response);
-                toast.add({ severity: 'success', summary: 'Free Narration Generated', detail: 'Narration using gTTS successfully generated.', life: 3000 });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    emitter.emit('updateSceneCard', response);
+                    toast.add({ severity: 'success', summary: 'Free Narration Generated', detail: 'Narration using gTTS successfully generated.', life: 3000 });
+                }, 1000); 
             } catch (error) {
-                console.error('Error saving the scene:', error);
-                toast.add({
-                severity: 'error',
-                summary: 'Something went wrong!',
-                detail: 'Failed to generate narration: ' + (error.response ? error.response.data.message : error.message),
-                life: 3000
-                });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    console.error('Error saving the scene:', error);
+                    toast.add({
+                    severity: 'error',
+                    summary: 'Something went wrong!',
+                    detail: 'Failed to generate narration: ' + (error.response ? error.response.data.message : error.message),
+                    life: 3000
+                    });
+                }, 1000); 
             }
         },
         reject: () => {
@@ -193,6 +235,7 @@ const saveScenePremiumNarrate = async () => {
         rejectLabel: 'No',
         acceptLabel: 'Yes',
         accept: async () => {
+            isLoading.value = true;
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/premium/create`, {
                     story_id: storyStore.story_id, 
@@ -200,21 +243,124 @@ const saveScenePremiumNarrate = async () => {
                     scene_id: props.scene_id,
                     voiceId: selectedvoice.value.id // Ensure this matches the data structure of the selected voice
                 });
-                emitter.emit('fetchScenes', response);
-                displayPremiumNarration.value = !displayPremiumNarration.value;
-                toast.add({ severity: 'success', summary: 'Premium Narration Generated', detail: 'Narration using AI successfully generated.', life: 3000 });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    emitter.emit('updateSceneCard', response);
+                    displayPremiumNarration.value = !displayPremiumNarration.value;
+                    toast.add({ severity: 'success', summary: 'Premium Narration Generated', detail: 'Narration using AI successfully generated.', life: 3000 });
+                }, 1000);
             } catch (error) {
-                console.error('Error generating narration:', error);
-                toast.add({
-                    severity: 'error',
-                    summary: 'Something went wrong!',
-                    detail: 'Failed to generate narration: ' + (error.response ? error.response.data.message : error.message),
-                    life: 3000
-                });
+                setTimeout(() => {
+                    isLoading.value = false;
+                    console.error('Error generating narration:', error);
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Something went wrong!',
+                        detail: 'Failed to generate narration: ' + (error.response ? error.response.data.message : error.message),
+                        life: 3000
+                    });
+                }, 1000);
             }
         },
         reject: () => {
             toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Narration generation cancelled', life: 3000 });
+        }
+    });
+};
+
+const deleteNarration = async () => {
+    confirm.require({
+        message: 'Are you sure you want to delete narration?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            isLoading.value = true;
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/delete`, 
+            { 
+                story_id: storyStore.story_id, 
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id
+            })
+            .then(response => {
+                emitter.emit('updateSceneCard', response);
+                toast.add({ severity: 'info', summary: 'Deleted', detail: 'You deleted a narration..', life: 3000 });
+            })
+            .catch(error => {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error, life: 3000 });
+            });
+            setTimeout(() => {
+                    isLoading.value = false;
+            }, 1000);
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Narration generation cancelled', life: 3000 });
+        }
+    });
+};
+
+const saveSceneFreeImage = async () => {
+    confirm.require({
+        message: 'Are you sure you want to generate image using Google?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            isLoading.value = true;
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/free/create`, {
+                story_id: storyStore.story_id, 
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id
+            })
+            .then(response => {
+                emitter.emit('updateSceneCard', response);
+                toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using Google.', life: 3000 });
+            })
+            .catch(error => {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error.response.data, life: 3000 });
+            });
+            setTimeout(() => {
+                isLoading.value = false;
+            }, 1000);
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Image generation cancelled', life: 3000 });
+        }
+    });
+};
+
+const saveScenePremiumImage = async () => {
+    confirm.require({
+        message: 'Are you sure you want to generate image using AI?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            isLoading.value = true;
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/premium/create`, {
+                story_id: storyStore.story_id, 
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id
+            })
+            .then(response => {
+                emitter.emit('updateSceneCard', response);
+                toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using Google.', life: 3000 });
+            })
+            .catch(error => {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error.response.data, life: 3000 });
+            });
+            setTimeout(() => {
+                isLoading.value = false;
+            }, 1000);
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Image generation cancelled', life: 3000 });
         }
     });
 };
@@ -278,12 +424,14 @@ const items = ref([
             {
                 label: 'Generate AI Image',
                 icon: 'pi pi-image',
-                disabled: props.scene_prompt == 'No AI Prompt Available'
+                disabled: props.scene_prompt == 'No AI Prompt Available',
+                command: saveScenePremiumImage
             },
             {
                 label: 'Search Google Image',
                 icon: 'pi pi-google',
-                disabled: props.scene_prompt == 'No AI Prompt Available'
+                disabled: props.scene_prompt == 'No AI Prompt Available',
+                command: saveSceneFreeImage
             },
             {
                 label: 'Select From Local',
@@ -314,6 +462,7 @@ const items = ref([
             {
                 label: 'Clear Narration',
                 icon: 'pi pi-trash',
+                command: deleteNarration,
                 disabled: !props.scene_withAudio
             }
         ]

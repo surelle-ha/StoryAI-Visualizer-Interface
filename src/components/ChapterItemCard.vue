@@ -2,7 +2,17 @@
     <Card style="width: 25rem; overflow: hidden">
         {{ scene }}
         <template #header>
-            <img alt="user header" src="https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png" class="header-image" />
+            <Image alt="Image" class="header-image" preview>
+                <template #indicatoricon>
+                    <i class="pi pi-search"></i>
+                </template>
+                <template #image>
+                    <img :src="imageUrl" class="header-image" alt="image" />
+                </template>
+                <template #preview="slotProps">
+                    <img :src="imageUrl" alt="preview" :style="slotProps.style" @click="slotProps.onClick" />
+                </template>
+            </Image>
         </template>
         <template #title>
             <span>{{ title }}</span>
@@ -51,6 +61,7 @@ export default {
         const emitter = inject('emitter');
         const audioPlayer = ref(null);
         const audioSrc = ref(null)
+        const imageUrl = ref(null);
         const displayContent = ref(false);
 
         const scene = (scenario.scenario).replace("Scene_", "");
@@ -110,10 +121,42 @@ export default {
             }
         };
 
+        const fetchImage = async () => {
+            try {
+                const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/get`, {
+                    params: {
+                        story_id: storyStore.story_id,
+                        chapter_id: storyStore.chapter_id,
+                        scene_id: scene
+                    }
+                });
+                console.log(response.data.imageUrl)
+                if (response.data && response.data.imageUrl) {
+                    imageUrl.value = `${process.env.VUE_APP_BACKEND_API_URL}${response.data.imageUrl}`;
+                } else {
+                    throw new Error('No image URL provided');
+                }
+            } catch (err) {
+                console.error('Failed to fetch image:', err);
+                imageUrl.value = 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png'; // Fallback image
+            }
+        };
+
+        const updateSceneCard = () => {
+            audioPlayer.value = (null);
+            audioSrc.value = (null)
+
+            fetchSceneContent();
+            fetchScenePrompt(); 
+            fetchAudioUrl();
+            fetchImage();
+        }
+
         onMounted(() => {
             fetchSceneContent();
             fetchScenePrompt(); 
             fetchAudioUrl();
+            fetchImage();
 
             title.value = scene ? 'Scenario ' + scene : 'Delete this scene and create again.';
             subtitle.value = 'No Content Available';
@@ -121,15 +164,17 @@ export default {
             footer.value = 'Hidden';
         });
 
-        return { title, subtitle, content, footer, editable, scene, playAudio, audioPlayer, audioSrc, displayContent };
+		emitter.on('updateSceneCard', updateSceneCard);
+
+        return { title, subtitle, content, footer, editable, scene, playAudio, audioPlayer, audioSrc, displayContent, imageUrl };
     }
 }
 </script>
 
 <style scoped>
     .header-image {
-        width: 100%; 
-        height: auto; 
+        width: 100%;
+        height: 250px;
     }
 
     .card {

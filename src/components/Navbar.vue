@@ -8,7 +8,7 @@
             <template #item="{ item, props, hasSubmenu, root }">
                 <component
                     :is="item.actionType === 'route' ? 'router-link' : 'a'"
-                    :to="item.actionType === 'route' ? item.label : undefined"
+                    :to="item.actionType === 'route' ? item.route : undefined"
                     @click="item.actionType === 'action' ? $emit(item.action) : null"
                     v-ripple
                     class="flex align-items-center"
@@ -53,12 +53,14 @@ watch(story_id, (newVal, oldVal) => {
 
 const items = ref([
     {
-        label: 'Visualizer',
+        label: 'Visualizer Studio',
+        route: 'visualizer',
         icon: 'pi pi-star',
         actionType: 'route', 
     },
     {
         label: 'Preview',
+        route: 'preview',
         icon: 'pi pi-play',
         actionType: 'route', 
     },

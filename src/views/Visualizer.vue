@@ -66,7 +66,9 @@ export default {
 			}
 		}
 
-		onMounted(fetchScenes);
+		onMounted(() => {
+			fetchScenes();
+		})
 
 		emitter.on('fetchScenes', fetchScenes);
 

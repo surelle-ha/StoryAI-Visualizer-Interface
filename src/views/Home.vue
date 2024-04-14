@@ -24,10 +24,18 @@
           <InputText type="number" id="chapter_id" v-model="chapter_id" class="flex-auto" autocomplete="off" />
         </div>
 
+        <div class="flex align-items-center gap-3 mb-5">
+          <label for="isGuest">Enter as Guest</label>
+          <InputSwitch inputId="isGuest" v-model="isGuest" />
+        </div>
+
         <div class="flex justify-content-end gap-2">
           <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"></Button>
           <Button type="button" label="Open" @click="sendData"></Button>
         </div>
+
+        
+
       </div>
     </Dialog>
   </div>
@@ -39,11 +47,13 @@ import { useStoryStore } from '../stores/storyStore';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from 'vue-router'
 
-const toast = useToast();
-const visible = ref(true);
-const story_name = ref('test');
+const story_name = ref('The Three Little Pigs');
 const story_id = ref(1);
 const chapter_id = ref(1);
+const isGuest = ref(true);
+
+const toast = useToast();
+const visible = ref(true);
 const loading = ref(false); // State to control spinner visibility
 const storyStore = useStoryStore();
 const router = useRouter()
