@@ -350,7 +350,7 @@ const saveScenePremiumImage = async () => {
             })
             .then(response => {
                 emitter.emit('updateSceneCard', response);
-                toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using Google.', life: 3000 });
+                toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using AI.', life: 3000 });
             })
             .catch(error => {
                 toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error.response.data, life: 3000 });

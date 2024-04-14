@@ -20,6 +20,7 @@ import Spinner from "../components/Spinner.vue";
 import { inject, ref, onMounted } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
 import { useToast } from "primevue/usetoast";
+import { useRouter } from 'vue-router';
 
 export default {
 	name: "Visualizer",
@@ -31,6 +32,7 @@ export default {
 	setup() {
 		const emitter = inject('emitter');
 		const storyStore = useStoryStore();
+		const router = useRouter();
   		const toast = useToast();
 		const scenes = ref([]);
         const isLoading = ref(true);
@@ -67,6 +69,7 @@ export default {
 		}
 
 		onMounted(() => {
+			if(!storyStore.isAuthor) { router.push('/play'); }
 			fetchScenes();
 		})
 

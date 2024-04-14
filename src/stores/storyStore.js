@@ -1,17 +1,24 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
 import axios from 'axios';
-
-const error = ref(null);
 
 export const useStoryStore = defineStore('storyStore', {
     state: () => ({
-        story_id: localStorage.getItem('story_id'),
-        chapter_id: localStorage.getItem('chapter_id')
+        access_id: localStorage.getItem('access_id') || null,
+        story_id: localStorage.getItem('story_id') || null,
+        chapter_id: localStorage.getItem('chapter_id') || null,
+        isAuthor: localStorage.getItem('isAuthor') === 'true', // Assuming isAuthor and isAdmin are booleans
+        isAdmin: localStorage.getItem('isAdmin') === 'true',
+        error: null, // Manage errors within the store
     }),
+    getters: {
+        isValid: (state) => {
+            return state.access_id !== null && state.story_id !== null && state.chapter_id !== null;
+        }
+    },
     actions: {
-        validate() {
-            return this.story_id !== null && this.chapter_id !== null;
+        updateAccessId(id) {
+            this.access_id = id;
+            localStorage.setItem('access_id', id);
         },
         updateStoryId(id) {
             this.story_id = id;
@@ -21,27 +28,43 @@ export const useStoryStore = defineStore('storyStore', {
             this.chapter_id = id;
             localStorage.setItem('chapter_id', id);
         },
-        async initializeStory(storyId, chapterId) {
+        updateAuthor(state) {
+            this.isAuthor = state;
+            localStorage.setItem('isAuthor', state.toString());
+        },
+        updateAdmin(state) {
+            this.isAdmin = state;
+            localStorage.setItem('isAdmin', state.toString());
+        },
+        async initializeStory(accessId, storyId, chapterId, isAuthor, isAdmin) {
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
+                    access_id: accessId,
                     story_id: storyId,
                     chapter_id: chapterId
                 });
                 if (response.data.status === 'success') {
+                    this.updateAccessId(accessId);
                     this.updateStoryId(storyId);
                     this.updateChapterId(chapterId);
+                    this.updateAuthor(isAuthor);
+                    this.updateAdmin(isAdmin);
                 } else {
-                    throw new Error('Failed to initialize story');
+                    this.error = response.data.message || 'An error occurred during initialization.';
+                    return response; // This might include error details that the component can handle
                 }
-            } catch (error) {
-                console.error('Error initializing story:', error.message);
+            } catch (err) {
+                this.error = err.message || 'Failed to initialize story.';
+                console.error('Error initializing story:', err.message);
             }
         },
         clearStory() {
+            localStorage.removeItem('access_id');
             localStorage.removeItem('story_id');
             localStorage.removeItem('chapter_id');
-            this.story_id = null;
-            this.chapter_id = null;
+            localStorage.removeItem('isAuthor');
+            localStorage.removeItem('isAdmin');
+            this.$reset(); // Resets all state to their initial values
         }
     }
 });

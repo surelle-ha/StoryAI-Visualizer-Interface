@@ -1,8 +1,18 @@
 <template>
   <div class="card flex justify-content-center align-items-center" style="height: 100vh;">
-    <Button label="Story Selector" @click="openDialog" />
-    <Dialog v-model:visible="visible" modal header="Story Visualizer" :style="{ width: '25rem' }">
-      <span class="p-text-secondary block mb-5">Warning: This modal has appeared because you did not access it from the actual home page. Please fill out the form below to test the Story Visualizer.</span>
+    <Button label="Story Selector" @click="openDialog" style="display:none;"/>
+    <Dialog v-model:visible="visible" modal header="Story Visualizer" :style="{ width: '30rem' }" :pt="{
+            root: {
+                style: 'border:none;',
+            },
+            mask: {
+                style: 'backdrop-filter: blur(2px);',
+            },
+            closeButton: {
+                style: 'display: none'
+            },
+        }">
+      <Message severity="warn" class="mb-6" :closable="false">This modal has appeared because you did not access it from the actual home page. Please fill out the form below to test the Story Visualizer.</Message>
       
       <div v-if="loading" class="center-spinner">
         <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="var(--surface-ground)"
@@ -10,17 +20,17 @@
       </div>
       <div v-else>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="story_name" class="font-semibold w-6rem">Story Name</label>
-          <InputText type="text" id="story_name" v-model="story_name" class="flex-auto" autocomplete="off" />
+          <label for="access_id" class="font-semibold w-8rem">Access ID</label>
+          <InputText type="text" id="access_id" v-model="access_id" class="flex-auto" autocomplete="off" />
         </div>
 
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="story_id" class="font-semibold w-6rem">Story ID</label>
+          <label for="story_id" class="font-semibold w-8rem">Story ID</label>
           <InputText type="number" id="story_id" v-model="story_id" class="flex-auto" autocomplete="off" />
         </div>
         
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="chapter_id" class="font-semibold w-6rem">Chapter ID</label>
+          <label for="chapter_id" class="font-semibold w-8rem">Chapter ID</label>
           <InputText type="number" id="chapter_id" v-model="chapter_id" class="flex-auto" autocomplete="off" />
         </div>
 
@@ -29,8 +39,12 @@
           <InputSwitch inputId="isAuthor" v-model="isAuthor" />
         </div>
 
+        <div class="flex align-items-center gap-3 mb-5">
+          <label for="isAdmin">Enter as Admin</label>
+          <InputSwitch inputId="isAdmin" v-model="isAdmin" />
+        </div>
+
         <div class="flex justify-content-end gap-2">
-          <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"></Button>
           <Button type="button" label="Open" @click="sendData"></Button>
         </div>
 
@@ -47,10 +61,11 @@ import { useStoryStore } from '../stores/storyStore';
 import { useToast } from "primevue/usetoast";
 import { useRoute, useRouter } from 'vue-router'
 
-const story_name = ref('');
+const access_id = ref(null);
 const story_id = ref(null);
 const chapter_id = ref(null);
 const isAuthor = ref(true);
+const isAdmin = ref(true);
 
 const toast = useToast();
 const visible = ref(true);
@@ -68,24 +83,25 @@ function closeDialog() {
 }
 
 onMounted(() => {
-    story_name.value = route.query.story_name || 'The Three Little Pigs'
+    access_id.value = (route.query.access_id) || ('999')
     story_id.value = route.query.story_id || 1
     chapter_id.value = route.query.chapter_id || 1
     isAuthor.value = route.query.isAuthor === 'true'
+    isAdmin.value = route.query.isAdmin === 'true'
 })
 
 async function sendData() {
   loading.value = true; // Activate spinner before sending data
-  await storyStore.initializeStory(story_id.value, chapter_id.value);
+  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value ,isAuthor.value, isAdmin.value);
   loading.value = false; // Deactivate spinner after receiving response
-  if (storyStore.story_id && storyStore.chapter_id) {
+  if (storyStore.access_id && storyStore.story_id && storyStore.chapter_id) {
     toast.add({ severity: 'success', summary: 'Initialized', detail: 'Successfully connected to server.', life: 3000 });
     console.log('Story initialized with ID:', storyStore.story_id, 'and Chapter ID:', storyStore.chapter_id);
     closeDialog();
 
     router.push({name: 'Visualizer'});
   } else {
-    toast.add({ severity: 'error', summary: 'Connection Error', detail: 'Failed to initialize story.', life: 3000 });
+    toast.add({ severity: 'error', summary: 'Connection Error', detail: response.data.message, life: 3000 });
   }
 }
 </script>
