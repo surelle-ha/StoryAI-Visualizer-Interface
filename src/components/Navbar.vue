@@ -31,7 +31,7 @@
                             <div class="flex flex-column gap-3 w-25rem">
                                 <div>
                                     <span class="font-medium text-900 block mb-2">Administrative Tools</span>
-                                    <span class="font-medium text-200 block mb-2">Comming Soon!</span>
+                                    <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                 </div>
                             </div>
                         </OverlayPanel>
@@ -40,13 +40,13 @@
 
                     <Button @click="Leave" v-if="storyStore.isValid" class="p-button-sm">Leave</Button>
 
-                    <Avatar image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" shape="circle" @click="toggle_User_Overlay" />
+                    <Avatar image="https://cdn-icons-png.flaticon.com/512/2499/2499292.png" shape="circle" @click="toggle_User_Overlay" />
 
                     <OverlayPanel ref="User_Overlay">
                             <div class="flex flex-column gap-3 w-25rem">
                                 <div>
                                     <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'#' + access_id"></Tag></span>
-                                    <span class="font-medium text-200 block mb-2">Comming Soon!</span>
+                                    <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                     <ProgressBar :value="40"> Tokens: 40/100 </ProgressBar>
                                 </div>
                             </div>
