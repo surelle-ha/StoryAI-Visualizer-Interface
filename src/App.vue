@@ -1,5 +1,5 @@
 <template>
-    <Toast />
+    <Toast baseZIndex.number="999999"/>
 	<Navbar />
 	<router-view />
 </template>

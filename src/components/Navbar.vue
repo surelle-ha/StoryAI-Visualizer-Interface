@@ -1,7 +1,7 @@
 
 <template>
     <div class="card">
-        <Menubar :model="items" style="border-radius: 60px;">
+        <Menubar :model="items" style="border-radius: 60px;background:transparent;border:none;">
             <template #start>
                 <img src="../assets/navbar.png" width="40px" alt="logo">
             </template>
@@ -45,9 +45,9 @@
                     <OverlayPanel ref="User_Overlay">
                             <div class="flex flex-column gap-3 w-25rem">
                                 <div>
-                                    <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'#' + access_id"></Tag></span>
+                                    <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'VSID #' + access_id"></Tag></span>
                                     <span class="font-medium text-200 block mb-2">Coming Soon!</span>
-                                    <ProgressBar :value="40"> Tokens: 40/100 </ProgressBar>
+                                    <ProgressBar :value="access_points"> AI Tokens: {{ access_points }}/100 </ProgressBar>
                                 </div>
                             </div>
                         </OverlayPanel>
@@ -65,12 +65,12 @@ import { useRouter } from 'vue-router';
 const storyStore = useStoryStore();
 const router = useRouter();
 
-
 const access_id = computed(() => storyStore.access_id);
 const story_id = computed(() => storyStore.story_id);
 const chapter_id = computed(() => storyStore.chapter_id);
 const isAuthor = computed(() => storyStore.isAuthor);
 const isAdmin = computed(() => storyStore.isAdmin);
+const access_points = computed(() => storyStore.access_points);
 
 const Admin_Overlay = ref();
 const User_Overlay = ref();
@@ -100,13 +100,6 @@ const items = computed(() => [
         label: 'AI Images',
         route: 'public-images',
         icon: 'pi pi-image',
-        actionType: 'route', 
-        show: storyStore.isAuthor
-    },
-    {
-        label: 'Preview',
-        route: 'preview',
-        icon: 'pi pi-eye',
         actionType: 'route', 
         show: storyStore.isAuthor
     },

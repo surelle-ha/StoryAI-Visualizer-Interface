@@ -301,6 +301,39 @@ const deleteNarration = async () => {
     });
 };
 
+const deleteImage = async () => {
+    confirm.require({
+        message: 'Are you sure you want to delete image?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            isLoading.value = true;
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/delete`, 
+            { 
+                story_id: storyStore.story_id, 
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id
+            })
+            .then(response => {
+                emitter.emit('updateSceneCard', response);
+                toast.add({ severity: 'info', summary: 'Deleted', detail: 'You deleted a image..', life: 3000 });
+            })
+            .catch(error => {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error, life: 3000 });
+            });
+            setTimeout(() => {
+                    isLoading.value = false;
+            }, 1000);
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Image Deletion cancelled', life: 3000 });
+        }
+    });
+};
+
 const saveSceneFreeImage = async () => {
     confirm.require({
         message: 'Are you sure you want to generate image using Google?',
@@ -434,13 +467,9 @@ const items = ref([
                 command: saveSceneFreeImage
             },
             {
-                label: 'Select From Local',
-                icon: 'pi pi-upload',
-                command: () => { displayUploadImage.value = true; }
-            },
-            {
                 label: 'Clear Image',
-                icon: 'pi pi-trash'
+                icon: 'pi pi-trash',
+                command: deleteImage
             }
         ]
     },

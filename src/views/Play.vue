@@ -25,7 +25,7 @@
             }"
         >
             <template #item="slotProps">
-                <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '100%' : '', display: !fullScreen ? 'block' : '' }]" />
+                <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }]" />
             </template>
             <template #thumbnail="slotProps">
                 <div class="grid grid-nogutter justify-content-center">
@@ -83,11 +83,11 @@ onMounted(async () => {
         console.log(images.value)
 
         const newItem = {
-            itemImageSrc: 'https://cdn.dribbble.com/users/189524/screenshots/2110114/00-clean_v3-3_800x600.gif',
-            thumbnailImageSrc: 'https://cdn.dribbble.com/users/189524/screenshots/2110114/00-clean_v3-3_800x600.gif',
+            itemImageSrc: 'https://i.pinimg.com/originals/29/e9/5a/29e95a45ba16d7e1f4a8664fbc8285c1.gif',
+            thumbnailImageSrc: 'https://i.pinimg.com/originals/29/e9/5a/29e95a45ba16d7e1f4a8664fbc8285c1.gif',
             alt: 'Pahina',
             title: 'Intro',
-            narrationUrl: 'https://cdn.pixabay.com/download/audio/2022/04/05/audio_6b0b09c193.mp3?filename=short-logo-108964.mp3'
+            narrationUrl: 'https://cdn.pixabay.com/download/audio/2023/06/14/audio_1f11dd8ab1.mp3?filename=sweet-transition-153787.mp3'
         };
 
         images.value.unshift(newItem);

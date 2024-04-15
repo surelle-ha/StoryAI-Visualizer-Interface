@@ -9,10 +9,12 @@
   "dependencies": {
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@toruslabs/eccrypto": "^4.0.0",
+    "@vueuse/integrations": "^10.9.0",
     "axios": "^1.6.8",
     "crypto": "^1.0.1",
     "date-fns": "^3.6.0",
     "firebase": "^10.10.0",
+    "jwt-decode": "^3.1.2",
     "md5": "^2.3.0",
     "mitt": "^3.0.1",
     "pinia": "^2.1.7",

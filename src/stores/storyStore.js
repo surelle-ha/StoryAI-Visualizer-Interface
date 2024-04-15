@@ -8,6 +8,7 @@ export const useStoryStore = defineStore('storyStore', {
         chapter_id: localStorage.getItem('chapter_id') || null,
         isAuthor: localStorage.getItem('isAuthor') === 'true', // Assuming isAuthor and isAdmin are booleans
         isAdmin: localStorage.getItem('isAdmin') === 'true',
+        access_points: localStorage.getItem('access_points') || 0,
         error: null, // Manage errors within the store
     }),
     getters: {
@@ -36,6 +37,10 @@ export const useStoryStore = defineStore('storyStore', {
             this.isAdmin = state;
             localStorage.setItem('isAdmin', state.toString());
         },
+        updateAccessPoints(points) {
+            this.access_points = points;
+            localStorage.setItem('access_points', points);
+        },
         async initializeStory(accessId, storyId, chapterId, isAuthor, isAdmin) {
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
@@ -43,12 +48,14 @@ export const useStoryStore = defineStore('storyStore', {
                     story_id: storyId,
                     chapter_id: chapterId
                 });
+                console.log('points: '+response.data.access.points)
                 if (response.data.status === 'success') {
                     this.updateAccessId(accessId);
                     this.updateStoryId(storyId);
                     this.updateChapterId(chapterId);
                     this.updateAuthor(isAuthor);
                     this.updateAdmin(isAdmin);
+                    this.updateAccessPoints(response.data.access.points);
                 } else {
                     this.error = response.data.message || 'An error occurred during initialization.';
                     return response; // This might include error details that the component can handle

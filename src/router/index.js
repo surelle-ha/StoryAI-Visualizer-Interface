@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, useRouter } from 'vue-router';
 import Home from '../views/Home.vue';
 import Visualizer from '../views/Visualizer.vue';
 import Public_Images from '../views/Public_Images.vue';
-import Preview from '../views/Preview.vue';
 import Play from '../views/Play.vue';
 import Settings from '../views/Settings.vue';
 
@@ -50,12 +49,6 @@ const routes = [
         path: '/public-images',
         name: 'Public_Images',
         component: Public_Images,
-        beforeEnter: requireStory,
-    },
-    {
-        path: '/preview',
-        name: 'Preview',
-        component: Preview,
         beforeEnter: requireStory,
     },
     {
