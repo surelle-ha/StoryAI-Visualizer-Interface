@@ -9,6 +9,7 @@ export const useStoryStore = defineStore('storyStore', {
         isAuthor: localStorage.getItem('isAuthor') === 'true', // Assuming isAuthor and isAdmin are booleans
         isAdmin: localStorage.getItem('isAdmin') === 'true',
         access_points: localStorage.getItem('access_points') || 0,
+        access_line: localStorage.getItem('access_line') || "Form",
         error: null, // Manage errors within the store
     }),
     getters: {
@@ -41,14 +42,18 @@ export const useStoryStore = defineStore('storyStore', {
             this.access_points = points;
             localStorage.setItem('access_points', points);
         },
-        async initializeStory(accessId, storyId, chapterId, isAuthor, isAdmin) {
+        updateAccessLine(line) {
+            this.access_line = line;
+            localStorage.setItem('access_line', line);
+        },
+        async initializeStory(accessId, storyId, chapterId, isAuthor, isAdmin, accessLine) {
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
                     access_id: accessId,
                     story_id: storyId,
                     chapter_id: chapterId
                 });
-                console.log('points: '+response.data.access.points)
+                console.log('points: '+accessLine)
                 if (response.data.status === 'success') {
                     this.updateAccessId(accessId);
                     this.updateStoryId(storyId);
@@ -56,6 +61,7 @@ export const useStoryStore = defineStore('storyStore', {
                     this.updateAuthor(isAuthor);
                     this.updateAdmin(isAdmin);
                     this.updateAccessPoints(response.data.access.points);
+                    this.updateAccessLine(accessLine);
                 } else {
                     this.error = response.data.message || 'An error occurred during initialization.';
                     return response; // This might include error details that the component can handle
@@ -71,6 +77,8 @@ export const useStoryStore = defineStore('storyStore', {
             localStorage.removeItem('chapter_id');
             localStorage.removeItem('isAuthor');
             localStorage.removeItem('isAdmin');
+            localStorage.removeItem('access_points');
+            localStorage.removeItem('access_line');
             this.$reset(); // Resets all state to their initial values
         }
     }

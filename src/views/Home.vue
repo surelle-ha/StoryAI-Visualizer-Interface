@@ -13,9 +13,15 @@
                 style: 'display: none'
             },
         }">
-        <Message severity="warn" class="mb-2" :closable="false">This modal has appeared because you did not access it from the actual home page. Please send the JSON Web Token if this is for Production use or fill out the form below to test the Story Visualizer.</Message>
-      
-        <TabView class="tabview-custom">
+
+        <Message severity="warn" class="mb-2" :closable="false" v-if="!loading">This modal has appeared because you did not access it from the actual home page. Please send the JSON Web Token if this is for Production use or fill out the form below to test the Story Visualizer.</Message>
+        
+        <div v-if="loading" class="center-spinner">
+          <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="var(--surface-ground)"
+        animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+        </div>
+
+        <TabView class="tabview-custom" v-else>
           <TabPanel>
               <template #header>
                   <div class="flex align-items-center gap-2">
@@ -78,7 +84,7 @@
                 </div>
 
                 <div class="flex justify-content-end gap-2">
-                  <Button type="button" label="Open" @click="sendData"></Button>
+                  <Button type="button" label="Open" @click="sendData()"></Button>
                 </div>
               </div>
           </TabPanel>
@@ -101,6 +107,8 @@ const story_id = ref(null);
 const chapter_id = ref(null);
 const isAuthor = ref(true);
 const isAdmin = ref(true);
+const accessLine = ref('Form')
+
 const encodedJwt = ref(null);
 const decodedJwt = ref(null);
 
@@ -125,6 +133,7 @@ onMounted(() => {
     chapter_id.value = route.query.chapter_id || 1
     isAuthor.value = route.query.isAuthor === 'true'
     isAdmin.value = route.query.isAdmin === 'true'
+    accessLine.value = route.query.accessLine || "Form"
 
     if (route.query.jwt) {
       try {
@@ -132,12 +141,13 @@ onMounted(() => {
         const { header, payload } = useJwt(encodedJwt.value);
         decodedJwt.value = { header, payload };
 
-
         access_id.value = decodedJwt.value.payload.access_id,
         story_id.value = decodedJwt.value.payload.story_id,
         chapter_id.value = decodedJwt.value.payload.chapter_id,
         isAuthor.value = decodedJwt.value.payload.isAuthor,
         isAdmin.value = decodedJwt.value.payload.isAdmin
+
+        accessLine.value = "JWT";
 
         sendData()
       } catch (error){
@@ -147,8 +157,9 @@ onMounted(() => {
 })
 
 async function sendData() {
+  storyStore.clearStory();
   loading.value = true; // Activate spinner before sending data
-  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value ,isAuthor.value, isAdmin.value);
+  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value ,isAuthor.value, isAdmin.value, accessLine.value);
   loading.value = false; // Deactivate spinner after receiving response
   if (storyStore.access_id && storyStore.story_id && storyStore.chapter_id) {
     toast.add({ severity: 'success', summary: 'Initialized', detail: 'Successfully connected to server.', life: 3000 });

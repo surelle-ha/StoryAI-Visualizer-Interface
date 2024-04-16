@@ -5,7 +5,7 @@
                 <Message :closable="false" severity="info">Public Published AI Generated Images</Message>
             </div>
         </div>
-        <div class="card flex justify-content-center">
+        <div class="card justify-content-center">
             <Galleria v-model:activeIndex="activeIndex" v-model:visible="displayCustom" :value="images" :responsiveOptions="responsiveOptions" :numVisible="7"
                 containerStyle="max-width: 850px" :circular="true" :fullScreen="true" :showItemNavigators="true" :showThumbnails="false">
                 <template #item="slotProps">
@@ -70,14 +70,14 @@ const imageClick = (index) => {
 <style scoped>
 .card {
     width: 100%; 
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto; 
     cursor: pointer;
 }
 
 .custom-thumbnail {
     display: block;
-    width: 100%;
+    width: 390px;
     height: auto;
 }
 
@@ -88,6 +88,7 @@ const imageClick = (index) => {
 }
 
 .grid-item {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;

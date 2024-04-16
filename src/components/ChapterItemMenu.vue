@@ -57,6 +57,34 @@
             </FileUpload>
         </Dialog>
 
+        <Dialog v-model:visible="displayPremiumImage" modal header="Premium AI Image Prompt Builder" :style="{ width: '50rem' }">
+            <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt.</Message>
+            <span class="p-text-secondary block">Header Prompt</span>
+            <Textarea v-model="imageCustomPrompt_disabled" rows="2" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+            <span class="p-text-secondary block">Enter your custom prompt. <code>Feel free to use your own format.</code></span>
+            <Textarea v-model="imageCustomPrompt" rows="5" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+
+            <div class="row">
+                <div class="col col-6 gap-3 mb-5">
+                    <span class="p-text-secondary block">AI Engine</span>
+                    <Dropdown v-model="selected_engine" :options="engines" optionLabel="name" placeholder="Select an engine" checkmark :highlightOnSelect="false" class="w-full md:w-14rem" />
+                </div>
+
+                <div class="col flex align-items-center gap-3 mb-5">
+                    <span class="p-text-secondary block">Image Size</span>
+                    <Dropdown v-model="selected_size" :options="sizes" optionLabel="name" placeholder="Select a size" checkmark :highlightOnSelect="false" class="w-full md:w-14rem" />
+                </div>
+            </div>
+
+            <span class="p-text-secondary block" style="color:yellow;">Complete Prompt</span>
+            <Textarea v-model="combinedImageCustomPrompt" disabled rows="15" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+
+            <div class="flex justify-content-end gap-2 mt-4">
+                <Button type="button" label="Cancel" severity="secondary" @click="displayPremiumImage = !displayPremiumImage"></Button>
+                <Button type="button" label="Save" @click="saveScenePremiumImage"></Button>
+            </div>
+        </Dialog>
+
         <Dialog v-model:visible="displayPremiumNarration" modal header="Generate Premium Narration" :style="{ width: '40rem' }">
             <span class="p-text-secondary block mb-5">Please select voice you want to use.</span>
             <Dropdown v-model="selectedvoice" :options="voices" optionLabel="label" placeholder="Select a voice" class="w-full md:w-40rem">
@@ -81,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, inject, onMounted  } from "vue";
+import { ref, defineProps, inject, onMounted, computed  } from "vue";
 import axios from 'axios';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
@@ -101,6 +129,20 @@ const isLoading = ref(false)
 
 const scenario_content = ref('');
 const scenario_prompt = ref('Once upon a time, ...');
+const imageCustomPrompt = ref(`Additional Information:\nArt: {\n\tStyle: ''\n},\nCharacter: [\n\t{\n\t\tName: '',\n\t\tAttribute: ''\n\t}\n],\n `);
+const imageCustomPrompt_disabled = ref('Imagine this is a kid story from a book. Create an Image Story Scene for this Scenario.');
+
+const combinedImageCustomPrompt = computed(()=>(`${imageCustomPrompt_disabled.value}\n\n${imageCustomPrompt.value}\n\nStory Scene:  ${scenario_prompt.value}`))
+
+const engines = ref([
+    { name: 'dall-e-3', value: 'dall-e-3', code: 'dall-e-3' },
+]);
+const sizes = ref([
+    { name: '1024x1024', value: '1024x1024', code: '1024x1024' },
+    { name: '1920x1080', value: '1920x1080', code: '1920x1080' },
+]);
+const selected_size = ref('dall-e-3');
+const selected_engine = ref('1024x1024');
 
 const saveSceneContent = async () => {
     isLoading.value = true;
@@ -379,7 +421,10 @@ const saveScenePremiumImage = async () => {
             await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/premium/create`, {
                 story_id: storyStore.story_id, 
                 chapter_id: storyStore.chapter_id,
-                scene_id: props.scene_id
+                scene_id: props.scene_id,
+                custom_prompt: combinedImageCustomPrompt.value,
+                engine: 'dall-e-3',//selected_engine.value,
+                size: '1024x1024'//selected_size.value
             })
             .then(response => {
                 emitter.emit('updateSceneCard', response);
@@ -390,6 +435,7 @@ const saveScenePremiumImage = async () => {
             });
             setTimeout(() => {
                 isLoading.value = false;
+                displayPremiumImage.value = !displayPremiumImage.value;
             }, 1000);
         },
         reject: () => {
@@ -458,7 +504,7 @@ const items = ref([
                 label: 'Generate AI Image',
                 icon: 'pi pi-image',
                 disabled: props.scene_prompt == 'No AI Prompt Available',
-                command: saveScenePremiumImage
+                command: () => { displayPremiumImage.value = true; }
             },
             {
                 label: 'Search Google Image',
@@ -509,6 +555,7 @@ const displayEditContent = ref(false);
 const displayEditPrompt = ref(false);
 const displayUploadImage = ref(false)
 const displayPremiumNarration = ref(false)
+const displayPremiumImage = ref(false)
 
 const previewEditor = ref(true)
 
@@ -516,3 +563,16 @@ const toggle = (event) => {
     menu.value.toggle(event);
 };
 </script>
+
+<style scoped>
+.row {
+    display: flex; /* Ensures flexbox layout */
+    align-items: center; /* Centers items vertically */
+    gap: 1rem; /* Adds space between the flex items */
+}
+.col {
+    display: flex; /* Ensures flexbox layout */
+    align-items: center; /* Centers items vertically */
+    gap: 0.5rem; /* Adds space between label and switch */
+}
+</style>
