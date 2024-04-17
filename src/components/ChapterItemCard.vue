@@ -15,13 +15,13 @@
             </Image>
         </template>
         <template #title>
-            <span>{{ title }}</span>
+            <span style="font-family: 'Roboto Slab', serif;letter-spacing: 2px;">{{ title }}</span>
             <Button @click="displayContent = !displayContent" icon="pi pi-book" label="View Content" class="ml-4 mr-2 custom-small-button"/>
             <Button @click="playAudio" v-if="audioSrc" icon="pi pi-volume-up" label="Audio Available" class="custom-small-button"/>
             <audio ref="audioPlayer" :src="audioSrc" hidden v-if="audioSrc"></audio>
         </template>
         <template #subtitle>
-            <Dialog v-model:visible="displayContent" modal :header="title" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+            <Dialog v-model:visible="displayContent" modal :header="title" style="font-family: 'Roboto Slab', serif;" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
                 <span v-html="subtitle"></span>
             </Dialog>
         </template>
@@ -35,7 +35,7 @@
                 <Button label="Edit" class="w-full" @click="editable=!editable"/>
             </div>
             <div class="flex gap-3 mt-1" v-else>
-                <ChapterItemMenu :scene_id="scene" :scene_content="subtitle" :scene_prompt="content" :scene_withAudio="audioSrc != null"/>
+                <ChapterItemMenu :scene_id="scene" :scene_content="subtitle" :scene_prompt="content" :scene_withAudio="audioSrc != null" :scene_withImage="imageUrl != null"/>
                 <Button label="Save" class="w-full" @click="editable=!editable"/>
             </div>
         </template>

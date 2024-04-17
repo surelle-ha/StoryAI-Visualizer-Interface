@@ -1,5 +1,10 @@
 <template>
     <div class="container p-5">
+
+		<div class="card flex justify-content-center">
+			<h1 class="w-100 flex-justify-center" style="letter-spacing: 5px; font-family: 'Roboto Slab', serif;">Chapter {{ chapter_id }}</h1>
+		</div>
+
         <ProgressSpinner v-if="isLoading" style="width: 50px; height: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
                          strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" aria-label="Loading scenarios"/>
         <div class="cards-container" v-if="scenes.length && !isLoading">
@@ -17,7 +22,7 @@
 import ChapterItemCard from "../components/ChapterItemCard.vue";
 import FloatMenu from "../components/FloatMenu.vue";
 import Spinner from "../components/Spinner.vue";
-import { inject, ref, onMounted } from "vue";
+import { inject, ref, onMounted, computed } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from 'vue-router';
@@ -36,9 +41,10 @@ export default {
   		const toast = useToast();
 		const scenes = ref([]);
         const isLoading = ref(true);
-
+		
 		const story_id = storyStore.story_id;
 		const chapter_id = storyStore.chapter_id;
+		console.log('test:', story_id)
 
 		const fetchScenes = async () => {
 			const params = new URLSearchParams({ story_id, chapter_id }).toString();
@@ -78,7 +84,9 @@ export default {
 		return {
 			scenes,
 			fetchScenes,
-            isLoading
+            isLoading,
+			story_id,
+			chapter_id
 		};
 	}
 };

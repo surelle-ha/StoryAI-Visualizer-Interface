@@ -39,7 +39,7 @@
                 {{ decodedJwt.payload === null ? 'Invalid' : decodedJwt.payload }}
               </Panel>
               <Panel header="JWT Verifier Link" class="mt-4" v-else>
-                <span>{{ origin }}?jwt={{ '<JWT HERE>' }}</span>
+                <span>{{ origin }}?jwt=<a style="color:green;">{{ '<jwt-here>' }}</a></span>
               </Panel>
           </TabPanel>
           <TabPanel>
@@ -168,7 +168,11 @@ async function sendData() {
 
     router.push({name: 'Visualizer'});
   } else {
-    toast.add({ severity: 'error', summary: 'Connection Error', detail: response.data.message, life: 3000 });
+    if(response) {
+      toast.add({ severity: 'error', summary: 'Connection Error', detail: response.data.message, life: 3000 });
+    }else{
+      toast.add({ severity: 'error', summary: 'Connection Error', detail: 'Unable to connect to server. ', life: 3000 });
+    }
   }
 }
 </script>

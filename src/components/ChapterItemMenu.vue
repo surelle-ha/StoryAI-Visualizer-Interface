@@ -29,7 +29,7 @@
                 <Editor id="scenario_content" v-model="scenario_content" placeholder="Content" editorStyle="height: 320px" />
             </div>
             <div class="flex align-items-center gap-3 mb-3" v-else>
-                <div v-html="scenario_content"></div>
+                <div v-html="scenario_content" style="font-family: 'Roboto Slab', serif;"></div>
             </div>
             <div class="flex justify-content-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayEditContent = !displayEditContent"></Button>
@@ -61,7 +61,7 @@
             <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt.</Message>
             <span class="p-text-secondary block">Header Prompt</span>
             <Textarea v-model="imageCustomPrompt_disabled" rows="2" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
-            <span class="p-text-secondary block">Enter your custom prompt. <code>Feel free to use your own format.</code></span>
+            <span class="p-text-secondary block">Enter your custom prompt. <code class="text-100" style="font-size: 15px;">Feel free to use your own format.</code></span>
             <Textarea v-model="imageCustomPrompt" rows="5" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
 
             <div class="row">
@@ -81,7 +81,7 @@
 
             <div class="flex justify-content-end gap-2 mt-4">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayPremiumImage = !displayPremiumImage"></Button>
-                <Button type="button" label="Save" @click="saveScenePremiumImage"></Button>
+                <Button type="button" label="Save" @click="saveScenePremiumImage" v-if="selected_engine && selected_size"></Button>
             </div>
         </Dialog>
 
@@ -109,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, inject, onMounted, computed  } from "vue";
+import { ref, defineProps, inject, onMounted, computed, watch  } from "vue";
 import axios from 'axios';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
@@ -123,7 +123,8 @@ const props = defineProps({
     scene_id: Number,
     scene_content: String,
     scene_prompt: String,
-    scene_withAudio: Boolean
+    scene_withAudio: Boolean,
+    scene_withImage: Boolean
 })
 const isLoading = ref(false)
 
@@ -136,13 +137,32 @@ const combinedImageCustomPrompt = computed(()=>(`${imageCustomPrompt_disabled.va
 
 const engines = ref([
     { name: 'dall-e-3', value: 'dall-e-3', code: 'dall-e-3' },
+    { name: 'dall-e-2', value: 'dall-e-2', code: 'dall-e-2' }
 ]);
-const sizes = ref([
-    { name: '1024x1024', value: '1024x1024', code: '1024x1024' },
-    { name: '1920x1080', value: '1920x1080', code: '1920x1080' },
-]);
-const selected_size = ref('dall-e-3');
-const selected_engine = ref('1024x1024');
+
+const sizes = ref([]);
+
+const selected_engine = ref(null);
+const selected_size = ref(null);
+
+watch(selected_engine, (newEngine) => {
+    if (newEngine?.value === 'dall-e-2') {
+        sizes.value = [
+            { name: '256x256', value: '256x256', code: '256x256' },
+            { name: '512x512', value: '512x512', code: '512x512' },
+            { name: '1024x1024', value: '1024x1024', code: '1024x1024' }
+        ];
+    } else if (newEngine?.value === 'dall-e-3') {
+        sizes.value = [
+            { name: '1024x1024', value: '1024x1024', code: '1024x1024' },
+            { name: '1024x1792', value: '1024x1792', code: '1024x1792' },
+            { name: '1792x1024', value: '1792x1024', code: '1792x1024' }
+        ];
+    } else {
+        sizes.value = []; 
+    }
+    selected_size.value = null;  
+});
 
 const saveSceneContent = async () => {
     isLoading.value = true;
@@ -418,14 +438,16 @@ const saveScenePremiumImage = async () => {
         acceptLabel: 'Yes',
         accept: async () => {
             isLoading.value = true;
-            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/premium/create`, {
+            const ai_request = {
+                access_id: storyStore.access_id,
                 story_id: storyStore.story_id, 
                 chapter_id: storyStore.chapter_id,
                 scene_id: props.scene_id,
                 custom_prompt: combinedImageCustomPrompt.value,
-                engine: 'dall-e-3',//selected_engine.value,
-                size: '1024x1024'//selected_size.value
-            })
+                engine: selected_engine.value.name,
+                size: selected_size.value.name,
+            }
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/premium/create`, ai_request)
             .then(response => {
                 emitter.emit('updateSceneCard', response);
                 toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using AI.', life: 3000 });
@@ -515,7 +537,8 @@ const items = ref([
             {
                 label: 'Clear Image',
                 icon: 'pi pi-trash',
-                command: deleteImage
+                command: deleteImage,
+                disabled: !props.scene_withImage
             }
         ]
     },
