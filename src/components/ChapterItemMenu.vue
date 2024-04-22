@@ -58,11 +58,17 @@
         </Dialog>
 
         <Dialog v-model:visible="displayPremiumImage" modal header="Premium AI Image Prompt Builder" :style="{ width: '50rem' }">
-            <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt.</Message>
-            <span class="p-text-secondary block">Header Prompt</span>
-            <Textarea v-model="imageCustomPrompt_disabled" rows="2" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
-            <span class="p-text-secondary block">Enter your custom prompt. <code class="text-100" style="font-size: 15px;">Feel free to use your own format.</code></span>
-            <Textarea v-model="imageCustomPrompt" rows="5" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+            <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt. <Badge value="-5 AI Token" severity="info"></Badge></Message>
+
+            <div v-if="!advance_prompt">
+                <span class="p-text-secondary block">Header Prompt</span>
+                <Textarea v-model="imageCustomPrompt_disabled" rows="2" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+            </div>
+
+            <div v-if="!advance_prompt">
+                <span class="p-text-secondary block">Enter your custom prompt. <code class="text-100" style="font-size: 15px;">Feel free to use your own format.</code></span>
+                <Textarea v-model="imageCustomPrompt" rows="5" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+            </div>
 
             <div class="row">
                 <div class="col col-6 gap-3 mb-5">
@@ -77,7 +83,14 @@
             </div>
 
             <span class="p-text-secondary block" style="color:yellow;">Complete Prompt</span>
-            <Textarea v-model="combinedImageCustomPrompt" disabled rows="15" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+            <Textarea v-model="combinedImageCustomPrompt" :disabled="!advance_prompt" rows="15" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
+
+            <div class="card flex flex-wrap justify-content-center gap-3" v-if="false">
+                <div class="flex align-items-center">
+                    <Checkbox v-model="advance_prompt" inputId="advance_prompt" name="advance_prompt" value="advance_prompt" />
+                    <label for="advance_prompt" class="ml-2"> Advance Prompting </label>
+                </div>
+            </div>
 
             <div class="flex justify-content-end gap-2 mt-4">
                 <Button type="button" label="Cancel" severity="secondary" @click="displayPremiumImage = !displayPremiumImage"></Button>
@@ -128,6 +141,7 @@ const props = defineProps({
 })
 const isLoading = ref(false)
 
+const advance_prompt = ref(false);
 const scenario_content = ref('');
 const scenario_prompt = ref('Once upon a time, ...');
 const imageCustomPrompt = ref(`Additional Information:\nArt: {\n\tStyle: ''\n},\nCharacter: [\n\t{\n\t\tName: '',\n\t\tAttribute: ''\n\t}\n],\n `);

@@ -10,7 +10,7 @@
             :showThumbnails="showThumbnails"
             :showItemNavigators="true"
             :showItemNavigatorsOnHover="true"
-            :circular="true"
+            :circular="false"
             :autoPlay="false"
             :transitionInterval="transitionInterval"
             :responsiveOptions="responsiveOptions"
@@ -25,6 +25,9 @@
             }"
         >
             <template #item="slotProps">
+                <div class="mx-6 px-6 flex-grow-1 subtitle p-3" style="position:absolute;bottom:0;background-color: rgb(30,30,30,0.5);border-radius: 25px;" v-if="images[activeIndex].subtitle">
+                    <div v-html="images[activeIndex].subtitle"></div>
+                </div>
                 <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }]" />
             </template>
             <template #thumbnail="slotProps">
@@ -72,22 +75,27 @@ const chapter_id = computed(() => storyStore.chapter_id);
 onMounted(async () => {
     try {
         const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/fetch`, { story_id: story_id.value, chapter_id: chapter_id.value });
-        images.value = Object.values(response.data).map(scene => ({
+        const fetchSubtitlesPromises = Object.values(response.data).map(scene => axios.get(scene.context));
+        const subtitlesResponses = await Promise.all(fetchSubtitlesPromises);
+        images.value = Object.values(response.data).map((scene, index) => ({
             itemImageSrc: scene.image,
             thumbnailImageSrc: scene.image,
             alt: 'Scene image',
             title: 'Scene',
-            narrationUrl: scene.sound
+            narrationUrl: scene.sound,
+            subtitle: subtitlesResponses[index].data.trim()
         }));
 
+        console.log('resources: ', response.data)
         console.log(images.value)
 
         const newItem = {
-            itemImageSrc: 'https://i.pinimg.com/originals/29/e9/5a/29e95a45ba16d7e1f4a8664fbc8285c1.gif',
-            thumbnailImageSrc: 'https://i.pinimg.com/originals/29/e9/5a/29e95a45ba16d7e1f4a8664fbc8285c1.gif',
+            itemImageSrc: 'https://i.pinimg.com/originals/b5/f3/5e/b5f35eb477f4217dbb1599b1e28d9cf0.gif',
+            thumbnailImageSrc: 'https://i.pinimg.com/originals/b5/f3/5e/b5f35eb477f4217dbb1599b1e28d9cf0.gif',
             alt: 'Pahina',
             title: 'Intro',
-            narrationUrl: 'https://cdn.pixabay.com/download/audio/2023/06/14/audio_1f11dd8ab1.mp3?filename=sweet-transition-153787.mp3'
+            narrationUrl: 'https://cdn.pixabay.com/download/audio/2023/06/14/audio_1f11dd8ab1.mp3?filename=sweet-transition-153787.mp3',
+            subtitle: 'Pahina Story Visualizer.'
         };
 
         images.value.unshift(newItem);
@@ -237,5 +245,9 @@ const slideButtonIcon = computed(() => {
 .start-button {
     font-size: 2em; /* Large play icon */
     color: white; /* White color icon */
+}
+.subtitle {
+    font-size: 16px; /* Adjust size as needed */
+    text-align: center; /* Center the subtitle text */
 }
 </style>
