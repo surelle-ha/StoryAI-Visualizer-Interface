@@ -2,7 +2,7 @@
     <div v-if="bannerDisplay" class="bg-bluegray-900 text-gray-100 px-3 py-1 mb-0 flex justify-content-between sm:justify-content-center align-items-center flex-wrap" style="margin: -8px;">
       <div class="font-bold mr-8"><Icon class="pi pi-info-circle mr-2"/>Attention</div>
       <div class="align-items-center hidden lg:flex">
-        <span class="line-height-3">You're using the development version of Story Visualizer.</span>
+        <span class="line-height-3">You're using the development version of {{ app_title }} Visualizer.</span>
       </div>
       <a class="text-white flex align-items-center ml-2 mr-8" href="#">
         <span class="underline font-bold">Learn More</span>
@@ -16,6 +16,7 @@
   <script setup>
   import { ref } from 'vue';
   
+  const app_title = ref(process.env.VUE_APP_TITLE);
   // Initialize bannerDisplay based on the localStorage value
   const bannerDisplay = ref(localStorage.getItem('bannerDisplay') !== 'false');
   

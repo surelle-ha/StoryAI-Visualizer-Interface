@@ -95,7 +95,7 @@ onMounted(async () => {
             alt: 'Pahina',
             title: 'Intro',
             narrationUrl: 'https://cdn.pixabay.com/download/audio/2023/06/14/audio_1f11dd8ab1.mp3?filename=sweet-transition-153787.mp3',
-            subtitle: 'Pahina Story Visualizer.'
+            subtitle: process.env.VUE_APP_TITLE + ' Story Visualizer.'
         };
 
         images.value.unshift(newItem);

@@ -2,7 +2,7 @@
   <div class="card flex justify-content-center align-items-center" style="height: 100vh;">
     <Button label="Story Selector" @click="openDialog" style="display:none;"/>
 
-    <Dialog v-model:visible="visible" modal header="Story Visualizer" :style="{ width: '35rem' }" :pt="{
+    <Dialog v-model:visible="visible" modal :header="app_title + ' Visualizer'" :style="{ width: '35rem' }" :pt="{
             root: {
                 style: 'border:none;',
             },
@@ -14,7 +14,7 @@
             },
         }">
 
-        <Message severity="warn" class="mb-2" :closable="false" v-if="!loading">This modal has appeared because you did not access it from the actual home page. Please send the JSON Web Token if this is for Production use or fill out the form below to test the Story Visualizer.</Message>
+        <Message severity="warn" class="mb-2" :closable="false" v-if="!loading">This modal has appeared because you did not access it from the actual home page. Please send the JSON Web Token if this is for Production use or fill out the form below to test the {{ app_title }} Visualizer.</Message>
         
         <div v-if="loading" class="center-spinner">
           <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="var(--surface-ground)"
@@ -30,7 +30,7 @@
                   </div>
               </template>
               <code style="text-align:justify;">
-                To access Story Visualizer using JWT, you will have to build your JSON Web Token Payload via web application and redirect here with `jwt` as parameter. To learn more, see <u>Documentation</u> in the Official Github Repository.  
+                To access {{ app_title }} Visualizer using JWT, you will have to build your JSON Web Token Payload via web application and redirect here with `jwt` as parameter. To learn more, see <u>Documentation</u> in the Official Github Repository.  
               </code>
               <Panel header="JWT Header" class="mt-4" v-if="decodedJwt">
                 {{ decodedJwt.header === null ? 'Invalid' : decodedJwt.header }}
@@ -102,6 +102,7 @@ import { useJwt } from '@vueuse/integrations/useJwt'
 
 const origin = ref(window.location.origin)
 
+const app_title = ref(process.env.VUE_APP_TITLE);
 const access_id = ref(null);
 const story_id = ref(null);
 const chapter_id = ref(null);

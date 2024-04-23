@@ -193,7 +193,7 @@ watch(isAuthor, (newVal, oldVal) => {
 
 const items = computed(() => [
 {
-        label: 'Visualizer Studio',
+        label: process.env.VUE_APP_TITLE + ' Studio',
         route: 'visualizer',
         icon: 'pi pi-star',
         actionType: 'route', 
