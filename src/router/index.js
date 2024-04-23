@@ -3,6 +3,7 @@ import Home from '../views/Home.vue';
 import Visualizer from '../views/Visualizer.vue';
 import Public_Images from '../views/Public_Images.vue';
 import Play from '../views/Play.vue';
+import Watch from '../views/Watch.vue';
 import Settings from '../views/Settings.vue';
 
 import { useStoryStore } from "@/stores/storyStore";
@@ -56,6 +57,11 @@ const routes = [
         name: 'Play',
         component: Play,
         beforeEnter: requireStory,
+    },
+    {
+        path: '/watch',
+        name: 'Watch',
+        component: Watch,
     },
     {
         path: '/settings',
