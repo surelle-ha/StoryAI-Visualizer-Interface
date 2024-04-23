@@ -120,6 +120,7 @@
 
 
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
+                        <Button @click="FallbackLeave" v-if="storyStore.isValid && access_line === 'JWT'" class="p-button-sm">Go Back to Home</Button>
 
                         <Avatar image="https://cdn-icons-png.flaticon.com/512/2499/2499292.png" shape="circle" @click="toggle_User_Overlay" />
 
@@ -173,6 +174,11 @@ const User_Overlay = ref();
 const Leave = () => {
     storyStore.clearStory();
     router.push('/');
+}
+
+const FallbackLeave = () => {
+    storyStore.clearStory();
+    window.location.href = (process.env.VUE_APP_FALLBACK_EXIT_URL) // Fallback URL
 }
 
 emitter.on('Leave', Leave);
