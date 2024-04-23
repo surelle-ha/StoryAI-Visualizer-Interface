@@ -183,7 +183,7 @@ const saveSceneContent = async () => {
     try {
         const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/content/save`, {
         story_id: storyStore.story_id,
-        chapter_id: storyStore.story_id,
+        chapter_id: storyStore.chapter_id,
         scene_id: props.scene_id,
         scene_content: scenario_content.value
         });
@@ -203,7 +203,7 @@ const saveScenePrompt = async () => {
     isLoading.value = true;
     await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/prompt/save`, {
         story_id: storyStore.story_id,
-        chapter_id: storyStore.story_id,
+        chapter_id: storyStore.chapter_id,
         scene_id: props.scene_id,
         scene_prompt: scenario_prompt.value
     })
@@ -234,7 +234,7 @@ const deleteScene = async () => {
             axios.delete(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/delete`, {
                 data: {
                     story_id: storyStore.story_id,
-                    chapter_id: storyStore.story_id,
+                    chapter_id: storyStore.chapter_id,
                     scene_id: props.scene_id
                 }
             })
