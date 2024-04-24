@@ -1,6 +1,6 @@
 <template>
 	<Banner />
-    <Toast baseZIndex.number="999999"/>
+    <Toast baseZIndex.number="999999" position="bottom-left"/>
 	<Navbar />
 	<router-view/>
 </template>

@@ -78,39 +78,33 @@
                                                 
                                             </TabPanel>
                                             <TabPanel header="Tools">
-                                                <Stepper orientation="vertical">
-                                                    <StepperPanel header="Header I">
-                                                        <template #content="{ nextCallback }">
-                                                            <div class="flex flex-column h-12rem">
-                                                                <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">Content I</div>
+
+                                                <Accordion :activeIndex="0">
+                                                    <AccordionTab header="User Token Manager">
+                                                        <div class="flex flex-column h-12rem">
+                                                            <FloatLabel class="flex align-items-center gap-3 mb-4 mt-2">
+                                                                <label for="access_id" class="font-semibold w-6rem">Access ID</label>
+                                                                <InputText v-model="admin_token_access_id" id="access_id" class="flex-auto" autocomplete="off" />
+                                                            </FloatLabel>
+                                                            <div class="flex justify-content-end gap-2">
+                                                                <Button type="button" severity="danger" label="-100" @click="tokenFund(admin_token_access_id, 100)"></Button>
+                                                                <Button type="button" severity="success" label="+100" @click="tokenFund(admin_token_access_id, 100)"></Button>
                                                             </div>
-                                                            <div class="flex py-4">
-                                                                <Button label="Next" @click="nextCallback" />
-                                                            </div>
-                                                        </template>
-                                                    </StepperPanel>
-                                                    <StepperPanel header="Header II">
-                                                        <template #content="{ prevCallback, nextCallback }">
-                                                            <div class="flex flex-column h-12rem">
-                                                                <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">Content II</div>
-                                                            </div>
-                                                            <div class="flex py-4 gap-2">
-                                                                <Button label="Back" severity="secondary" @click="prevCallback" />
-                                                                <Button label="Next" @click="nextCallback" />
-                                                            </div>
-                                                        </template>
-                                                    </StepperPanel>
-                                                    <StepperPanel header="Header III">
-                                                        <template #content="{ prevCallback }">
-                                                            <div class="flex flex-column h-12rem">
-                                                                <div class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">Content III</div>
-                                                            </div>
-                                                            <div class="flex py-4">
-                                                                <Button label="Back" severity="secondary" @click="prevCallback" />
-                                                            </div>
-                                                        </template>
-                                                    </StepperPanel>
-                                                </Stepper>
+                                                        </div>
+                                                    </AccordionTab>
+                                                    <AccordionTab header="Header II">
+                                                        <p class="m-0">
+                                                            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
+                                                            enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
+                                                        </p>
+                                                    </AccordionTab>
+                                                    <AccordionTab header="Header III">
+                                                        <p class="m-0">
+                                                            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
+                                                            culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
+                                                        </p>
+                                                    </AccordionTab>
+                                                </Accordion>
                                             </TabPanel>
                                         </TabView>
                                     </div>
@@ -129,7 +123,8 @@
                                     <div>
                                         <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'VSID #' + access_id"></Tag></span>
                                         <span class="font-medium text-200 block mb-2">Coming Soon!</span>
-                                        <ProgressBar :value="access_points"> AI Tokens: {{ access_points }}/100 </ProgressBar>
+                                        <span>AI Tokens: {{ access_points }}</span><br>
+                                        <Button label="Add Token" icon="pi pi-dollar" class="p-button-sm" @click="tokenFund(storyStore.access_id, 50)"/>
                                     </div>
                                 </div>
                             </OverlayPanel>
@@ -145,11 +140,13 @@ import { inject, ref, watch, onMounted, computed } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
 import { useRouter } from 'vue-router';
 import { usePrimeVue } from "primevue/config";
+import { useToast } from "primevue/usetoast";
 import axios from "axios";
 
 const emitter = inject('emitter');
 const storyStore = useStoryStore();
 const router = useRouter();
+const toast = useToast();
 
 const access_id = computed(() => storyStore.access_id);
 const story_id = computed(() => storyStore.story_id);
@@ -158,6 +155,8 @@ const isAuthor = computed(() => storyStore.isAuthor);
 const isAdmin = computed(() => storyStore.isAdmin);
 const access_points = computed(() => storyStore.access_points);
 const access_line = computed(() => storyStore.access_line);
+
+const admin_token_access_id = ref('');
 
 const user_count = ref();
 const user_count_since = ref();
@@ -214,6 +213,23 @@ const items = computed(() => [
         show: storyStore.isValid
     },
 ]);
+
+const tokenFund = async (fund_access_id, fund_amount) => {
+    await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/token/fund`, {
+        access_id: fund_access_id,
+        amount: fund_amount
+    })
+    .then(response => {
+        toast.add({ severity: 'success', summary: 'Token Updated', detail: `Successfully funded ${fund_amount} tokens to user ${fund_access_id}`, life: 3000 });
+        console.log('pnt', response);
+
+        storyStore.updateAccessPoints(response.data.AfterAction);
+    })
+    .catch(error => {
+        toast.add({ severity: 'error', summary: 'Token Update Error', detail: `Access ID does not exist or there's an error funding user with ${fund_amount} tokens.`, life: 3000 });
+    });
+};
+
 
 const get_user_count = async () => {
     const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/statistics/access/count`)

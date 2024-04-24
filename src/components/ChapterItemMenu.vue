@@ -313,12 +313,20 @@ const saveScenePremiumNarrate = async () => {
         accept: async () => {
             isLoading.value = true;
             try {
+                const rate = 5;
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/narrate/premium/create`, {
+                    access_id: storyStore.access_id, 
                     story_id: storyStore.story_id, 
                     chapter_id: storyStore.chapter_id,
                     scene_id: props.scene_id,
-                    voiceId: selectedvoice.value.id // Ensure this matches the data structure of the selected voice
+                    voiceId: selectedvoice.value.id, // Ensure this matches the data structure of the selected voice
+                    rate: rate
                 });
+                console.log('point', response)
+                if(response.data.success){
+                    toast.add({ severity: 'success', summary: `Token Alert`, detail: `We deducted ${rate} tokens from your account.`, life: 3000 });
+                    storyStore.updateAccessPoints(response.data.AfterAction)
+                }
                 setTimeout(() => {
                     isLoading.value = false;
                     emitter.emit('updateSceneCard', response);
@@ -452,6 +460,7 @@ const saveScenePremiumImage = async () => {
         acceptLabel: 'Yes',
         accept: async () => {
             isLoading.value = true;
+            const rate = 5;
             const ai_request = {
                 access_id: storyStore.access_id,
                 story_id: storyStore.story_id, 
@@ -460,10 +469,15 @@ const saveScenePremiumImage = async () => {
                 custom_prompt: combinedImageCustomPrompt.value,
                 engine: selected_engine.value.name,
                 size: selected_size.value.name,
+                rate: rate
             }
             await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/premium/create`, ai_request)
             .then(response => {
                 emitter.emit('updateSceneCard', response);
+                if(response.data.success){
+                    toast.add({ severity: 'success', summary: `Token Alert`, detail: `We deducted ${rate} tokens from your account.`, life: 3000 });
+                    storyStore.updateAccessPoints(response.data.AfterAction)
+                }
                 toast.add({ severity: 'info', summary: 'Success', detail: 'Successfully generated scene image using AI.', life: 3000 });
             })
             .catch(error => {
