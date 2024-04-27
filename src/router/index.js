@@ -5,6 +5,7 @@ import Public_Images from '../views/Public_Images.vue';
 import Play from '../views/Play.vue';
 import Watch from '../views/Watch.vue';
 import Settings from '../views/Settings.vue';
+import Store from '../views/Store.vue';
 
 import { useStoryStore } from "@/stores/storyStore";
 
@@ -67,6 +68,12 @@ const routes = [
         path: '/settings',
         name: 'Settings',
         component: Settings,
+        beforeEnter: requireStory,
+    },
+    {
+        path: '/store',
+        name: 'Store',
+        component: Store,
         beforeEnter: requireStory,
     },
 ];

@@ -86,8 +86,9 @@
                                                                 <label for="access_id" class="font-semibold w-6rem">Access ID</label>
                                                                 <InputText v-model="admin_token_access_id" id="access_id" class="flex-auto" autocomplete="off" />
                                                             </FloatLabel>
+                                                            <InlineMessage severity="info" class="mb-4" v-if="token_change_update.message">{{ token_change_update.message }}</InlineMessage>
                                                             <div class="flex justify-content-end gap-2">
-                                                                <Button type="button" severity="danger" label="-100" @click="tokenFund(admin_token_access_id, 100)"></Button>
+                                                                <Button type="button" severity="danger" label="-100" @click="tokenDeduct(admin_token_access_id, 100)"></Button>
                                                                 <Button type="button" severity="success" label="+100" @click="tokenFund(admin_token_access_id, 100)"></Button>
                                                             </div>
                                                         </div>
@@ -124,7 +125,7 @@
                                         <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'VSID #' + access_id"></Tag></span>
                                         <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                         <span>AI Tokens: {{ access_points }}</span><br>
-                                        <Button label="Add Token" icon="pi pi-dollar" class="p-button-sm" @click="tokenFund(storyStore.access_id, 50)"/>
+                                        <Button label="Add 50 AI Token" icon="pi pi-dollar" class="p-button-sm bt-4" @click="tokenFund(storyStore.access_id, 50)"  v-if="isAdmin"/>
                                     </div>
                                 </div>
                             </OverlayPanel>
@@ -165,6 +166,8 @@ const story_count_since = ref();
 const prompt_count = ref();
 const prompt_count_since = ref();
 
+const token_change_update = ref('');
+
 console.log('line', access_line.value)
 
 const Admin_Overlay = ref();
@@ -182,6 +185,10 @@ const FallbackLeave = () => {
 
 emitter.on('Leave', Leave);
 
+watch(admin_token_access_id, (newVal, oldVal) => {
+    token_change_update.value = '';
+});
+
 watch(story_id, (newVal, oldVal) => {
     console.log('Story ID changed from', oldVal, 'to', newVal);
 });
@@ -195,6 +202,14 @@ const items = computed(() => [
         label: process.env.VUE_APP_TITLE + ' Studio',
         route: 'visualizer',
         icon: 'pi pi-star',
+        actionType: 'route', 
+        show: storyStore.isAuthor
+    },
+    {
+        
+        label: 'Store',
+        route: 'store',
+        icon: 'pi pi-shop',
         actionType: 'route', 
         show: storyStore.isAuthor
     },
@@ -222,11 +237,29 @@ const tokenFund = async (fund_access_id, fund_amount) => {
     .then(response => {
         toast.add({ severity: 'success', summary: 'Token Updated', detail: `Successfully funded ${fund_amount} tokens to user ${fund_access_id}`, life: 3000 });
         console.log('pnt', response);
+        token_change_update.value = response.data;
 
         storyStore.updateAccessPoints(response.data.AfterAction);
     })
     .catch(error => {
         toast.add({ severity: 'error', summary: 'Token Update Error', detail: `Access ID does not exist or there's an error funding user with ${fund_amount} tokens.`, life: 3000 });
+    });
+};
+
+const tokenDeduct = async (fund_access_id, fund_amount) => {
+    await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/token/deduct`, {
+        access_id: fund_access_id,
+        amount: fund_amount
+    })
+    .then(response => {
+        toast.add({ severity: 'success', summary: 'Token Updated', detail: `Successfully duducted ${fund_amount} tokens from user ${fund_access_id}`, life: 3000 });
+        console.log('pnt', response);
+        token_change_update.value = response.data;
+
+        storyStore.updateAccessPoints(response.data.AfterAction);
+    })
+    .catch(error => {
+        toast.add({ severity: 'error', summary: 'Token Update Error', detail: `Access ID does not exist or there's an error deducting token from user with ${fund_amount} tokens.`, life: 3000 });
     });
 };
 
