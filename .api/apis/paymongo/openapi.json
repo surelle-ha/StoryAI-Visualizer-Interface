@@ -1,0 +1,30 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PayMongo API",
+    "version": "unknown"
+  },
+  "servers": [
+    {
+      "url": "https://api.paymongo.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "sec0": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "security": [
+    {
+      "sec0": []
+    }
+  ],
+  "paths": {},
+  "x-readme": {
+    "headers": []
+  },
+  "x-readme-fauxas": true
+}

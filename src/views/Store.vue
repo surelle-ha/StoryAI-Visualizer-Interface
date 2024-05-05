@@ -7,7 +7,6 @@
 				:numScroll="1"
 				:responsiveOptions="responsiveOptions"
 				circular
-				:autoplayInterval="3000"
 			>
 				<template #item="slotProps">
 					<div class="border-1 surface-border border-round m-2 p-3">
@@ -47,87 +46,58 @@
 				v-model:visible="displayCheckout"
 				modal
 				header="Checkout"
-				:style="{ width: '60rem' }"
+				:style="{ width: '25rem' }"
 			>
-				<div class="col-12 lg:col-12 h-full px-4 py-4 md:px-6">
-					<div class="grid formgrid">
-						<div class="col-12 field mb-4">
-							<span class="text-900 text-2xl block font-medium mb-2"
-								>Personal Details</span
-							>
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-							<input
-								id="name"
-								placeholder="Name"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-							<input
-								id="lastname"
-								placeholder="Last Name"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 field mb-4">
-							<input
-								id="address"
-								placeholder="Address 1"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 field mb-4">
-							<input
-								id="address2"
-								placeholder="Address 2"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-							<input
-								id="city"
-								placeholder="City/Town, Province"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-							<input
-								id="zipcode"
-								placeholder="Zipcode"
-								type="text"
-								class="p-inputtext w-full"
-							/>
-						</div>
-						<div class="col-12 field mb-4">
-							<Dropdown v-model="selectedCountries" :options="countries" optionLabel="name" placeholder="Select a Country" class="w-full" />
-						</div>
-
-                        <div class="col-12 field mb-4">
-							<span class="text-900 text-2xl block font-medium mb-2 mt-4"
-								>Payment Details</span
-							>
-						</div>
-						<div class="col-12 field mb-4">
-                            <InputMask id="basic" v-model="value" mask="9999-9999-9999-9999" placeholder="Card Number" class="p-inputtext w-full" />
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-                            <InputMask id="basic" v-model="value" mask="99/99" placeholder="Expiry Date" class="w-full" />
-						</div>
-						<div class="col-12 lg:col-6 field mb-4">
-							<InputMask id="basic" v-model="value" mask="999" placeholder="CVV" class="w-full" />
-						</div>
-
-						<div
-							class="col-12 flex flex-column lg:flex-row justify-content-center align-items-center lg:justify-content-end my-6"
+				<div v-if="checkoutProcessNext">
+					<div v-if="awaitingForPayment">
+						<span class="p-text-secondary block mb-5"
+							>Do not close this tab.</span
 						>
-							<Button :label="'Confirm Purchase'" @click="tokenFund(storyStore.access_id, selectedProduct.quantity)"/>
+						<div class="flex justify-content-center">
+							<ProgressSpinner
+								style="width: 50px; height: 50px"
+								strokeWidth="8"
+								fill="var(--surface-ground)"
+								animationDuration=".5s"
+								aria-label="Custom ProgressSpinner"
+							/>
 						</div>
+						<div class="flex justify-content-center mt-4">
+							<span>Waiting for your payment</span>
+						</div>
+					</div>
+
+					<div v-else-if="displayPaymentSuccess">Payment Successs</div>
+
+					<div v-else-if="displayPaymentFailed">Payment Failed</div>
+
+					<div v-else>
+						<span class="p-text-secondary block mb-5"
+							>Press link button below to redirect to payment.
+						</span>
+						<button @click="navigateToCheckout">Pay Now</button>
+					</div>
+				</div>
+
+				<div v-else>
+					<span class="p-text-secondary block mb-5"
+						>To confirm the purchase, please press the confirm button
+						below.</span
+					>
+					<div class="flex justify-content-end gap-2">
+						<Button
+							type="button"
+							label="Cancel"
+							severity="secondary"
+							@click="displayCheckout = false"
+						></Button>
+						<Button
+							type="button"
+							label="Confirm"
+							@click="
+								createPaymentLink(selectedProduct.price * 100, 'test', 'test')
+							"
+						></Button>
 					</div>
 				</div>
 			</Dialog>
@@ -144,15 +114,15 @@ import axios from "axios";
 const storyStore = useStoryStore();
 const toast = useToast();
 
-const selectedProduct = ref("");
+const isLoading = ref(false);
+const selectedProduct = ref(null);
 const displayCheckout = ref(false);
+const checkoutDetails = ref([]);
+const checkoutProcessNext = ref(false);
+const awaitingForPayment = ref(false);
 
-const selectedCountries = ref('')
-
-const checkout = (checkout_obj) => {
-	displayCheckout.value = !displayCheckout.value;
-	selectedProduct.value = checkout_obj;
-};
+const displayPaymentSuccess = ref(false);
+const displayPaymentFailed = ref(false);
 
 const tokenFund = async (fund_access_id, fund_amount) => {
     await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/token/fund`, {
@@ -162,57 +132,121 @@ const tokenFund = async (fund_access_id, fund_amount) => {
     .then(response => {
         toast.add({ severity: 'success', summary: 'Token Updated', detail: `Successfully funded ${fund_amount} tokens to user ${fund_access_id}`, life: 3000 });
         console.log('pnt', response);
-		displayCheckout.value = !displayCheckout.value;
-
+        storyStore.updateAccessPoints(response.data.AfterAction);
         storyStore.updateAccessPoints(response.data.AfterAction);
     })
     .catch(error => {
+		console.log(error)
         toast.add({ severity: 'error', summary: 'Token Update Error', detail: `Access ID does not exist or there's an error funding user with ${fund_amount} tokens.`, life: 3000 });
     });
 };
 
+const createPaymentLink = (amount, description, remarks) => {
+	isLoading.value = true;
+	awaitingForPayment.value = false;
+	displayPaymentSuccess.value = false;
+	displayPaymentFailed.value = false;
+
+	const options = {
+		method: "POST",
+		url: "https://api.paymongo.com/v1/links",
+		headers: {
+			accept: "application/json",
+			"content-type": "application/json",
+			authorization: "Basic c2tfdGVzdF9wOUtZVkw3c3VCWXc5S1lUaWZkYUZhVTQ6",
+		},
+		data: {
+			data: {
+				attributes: {
+					amount: amount,
+					description: description,
+					remarks: remarks,
+				},
+			},
+		},
+	};
+
+	axios
+		.request(options)
+		.then(function (response) {
+			checkoutDetails.value = response.data.data.attributes;
+			checkoutProcessNext.value = true;
+		})
+		.catch(function (error) {
+			console.error(error);
+		})
+		.finally(() => {
+			isLoading.value = false;
+		});
+};
+
+const navigateToCheckout = () => {
+	awaitingForPayment.value = true;
+	window.open(checkoutDetails.value.checkout_url, "_blank");
+
+	const intervalId = setInterval(async () => {
+		const result = await checkPaymentStatus(
+			checkoutDetails.value.reference_number
+		);
+		if (result) {
+			console.log("Payment successful");
+			tokenFund(storyStore.access_id, selectedProduct.value.quantity);
+			awaitingForPayment.value = false;
+			displayPaymentSuccess.value = true;
+			displayPaymentFailed.value = false;
+			clearInterval(intervalId);
+		}
+	}, 20000);
+
+	setTimeout(() => {
+		awaitingForPayment.value = false;
+		displayPaymentSuccess.value = false;
+		displayPaymentFailed.value = true;
+		clearInterval(intervalId);
+		console.log("timeout");
+	}, 600000); // 10 minutes as per your requirement
+};
+
+const checkPaymentStatus = async (reference) => {
+	const options = {
+		method: "GET",
+		url: `https://api.paymongo.com/v1/links/${reference}`,
+		headers: {
+			accept: "application/json",
+			authorization: "Basic c2tfdGVzdF9wOUtZVkw3c3VCWXc5S1lUaWZkYUZhVTQ6",
+		},
+	};
+
+	try {
+		const response = await axios.request(options);
+		console.log(response.data);
+		return response.data.data.attributes.status !== "unpaid";
+	} catch (error) {
+		console.log(error); // It's a good practice to log the error
+		return false;
+	}
+};
+
+const checkout = (product) => {
+	if (selectedProduct.value && selectedProduct.value.id === product.id) {
+		displayCheckout.value = true;
+	} else {
+		selectedProduct.value = product;
+		displayCheckout.value = true;
+		checkoutProcessNext.value = false;
+	}
+};
+
 const products = ref([]);
 const responsiveOptions = ref([
-	{
-		breakpoint: "1400px",
-		numVisible: 2,
-		numScroll: 1,
-	},
-	{
-		breakpoint: "1199px",
-		numVisible: 3,
-		numScroll: 1,
-	},
-	{
-		breakpoint: "767px",
-		numVisible: 2,
-		numScroll: 1,
-	},
-	{
-		breakpoint: "575px",
-		numVisible: 1,
-		numScroll: 1,
-	},
+	{ breakpoint: "1400px", numVisible: 2, numScroll: 1 },
+	{ breakpoint: "1199px", numVisible: 3, numScroll: 1 },
+	{ breakpoint: "767px", numVisible: 2, numScroll: 1 },
+	{ breakpoint: "575px", numVisible: 1, numScroll: 1 },
 ]);
 
-const countries = ref([
-    {
-        name: 'Philippines'
-    }
-])
-
 onMounted(() => {
-
 	products.value = [
-		{
-			id: "30at",
-			name: "30 AI Tokens",
-			quantity: 30,
-			price: "50",
-			image:
-				"https://www.techopedia.com/wp-content/uploads/2023/10/fetch-ai-price-prediction.png",
-			inventoryStatus: "INSTOCK",
-		},
 		{
 			id: "60at",
 			name: "60 AI Tokens",
@@ -256,13 +290,10 @@ const getSeverity = (status) => {
 	switch (status) {
 		case "INSTOCK":
 			return "success";
-
 		case "LOWSTOCK":
 			return "warning";
-
 		case "OUTOFSTOCK":
 			return "danger";
-
 		default:
 			return null;
 	}
