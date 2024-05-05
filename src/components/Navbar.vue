@@ -114,10 +114,11 @@
                         </div>
 
 
+                        <Button @click="downloadChapter" icon="pi pi-download" label="Download Chapter" :loading="isLoading"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
                         <Button @click="FallbackLeave" v-if="storyStore.isValid && access_line === 'JWT'" class="p-button-sm">Go Back to Home</Button>
 
-                        <Avatar image="https://cdn-icons-png.flaticon.com/512/2499/2499292.png" shape="circle" @click="toggle_User_Overlay" />
+                        <Avatar image="https://cdn-icons-png.flaticon.com/512/2499/2499292.png" shape="circle" @click="toggle_User_Overlay" v-if="isAuthor || isAdmin"/>
 
                         <OverlayPanel ref="User_Overlay">
                                 <div class="flex flex-column gap-3 w-25rem">
@@ -168,6 +169,8 @@ const prompt_count_since = ref();
 
 const token_change_update = ref('');
 
+const isLoading = ref(false);
+
 console.log('line', access_line.value)
 
 const Admin_Overlay = ref();
@@ -203,7 +206,7 @@ const items = computed(() => [
         route: 'visualizer',
         icon: 'pi pi-star',
         actionType: 'route', 
-        show: storyStore.isAuthor
+        show: storyStore.isValid
     },
     {
         
@@ -228,6 +231,32 @@ const items = computed(() => [
         show: storyStore.isValid
     },
 ]);
+
+const downloadChapter = async () => {
+    isLoading.value = true;
+    await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/video/generate`, {
+        story_id: storyStore.story_id,
+        chapter_id: storyStore.chapter_id
+    })
+    .then(async response => {
+        const url = response.data.url;
+        const filename = `story_${storyStore.story_id}_chapter_${storyStore.chapter_id}.mp4`;
+        const videoBlob = await fetch(url).then(response => response.blob());
+        const blobUrl = window.URL.createObjectURL(videoBlob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        isLoading.value = false;
+        toast.add({ severity: 'success', summary: 'Download Started', detail: 'The video download has started.', life: 3000 });
+    })
+    .catch(error => {
+        isLoading.value = false;
+        toast.add({ severity: 'error', summary: 'Video Generation Error', detail: 'Failed to generate the video.', life: 3000 });
+    });
+}
 
 const tokenFund = async (fund_access_id, fund_amount) => {
     await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/token/fund`, {

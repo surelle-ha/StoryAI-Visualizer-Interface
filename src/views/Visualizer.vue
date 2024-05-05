@@ -75,7 +75,7 @@ export default {
 		}
 
 		onMounted(() => {
-			if(!storyStore.isAuthor) { router.push('/play'); }
+			//if(!storyStore.isAuthor) { router.push('/play'); }
 			fetchScenes();
 		})
 

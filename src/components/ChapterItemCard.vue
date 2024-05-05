@@ -30,7 +30,7 @@
                 {{ content }}
             </p>
         </template>
-        <template #footer>
+        <template #footer v-if="storyStore.isAuthor">
             <div class="flex gap-3 mt-1" v-if="editable">
                 <Button label="Edit" class="w-full" @click="editable=!editable"/>
             </div>
@@ -166,7 +166,7 @@ export default {
 
 		emitter.on('updateSceneCard', updateSceneCard);
 
-        return { title, subtitle, content, footer, editable, scene, playAudio, audioPlayer, audioSrc, displayContent, imageUrl };
+        return { title, subtitle, content, footer, editable, scene, playAudio, audioPlayer, audioSrc, displayContent, imageUrl, storyStore };
     }
 }
 </script>
