@@ -49,12 +49,8 @@
             </div>
         </Dialog>
 
-        <Dialog v-model:visible="displayUploadImage" modal header="Upload Scene Image" :style="{ width: '25rem' }">
-            <FileUpload name="demo[]" url="http://localhost:80/api/scene/image/save" @upload="saveSceneUploadImage($event)" :multiple="true" accept="image/*" :maxFileSize="1000000">
-                <template #empty>
-                    <p>Drag and drop files to here to upload.</p>
-                </template>
-            </FileUpload>
+        <Dialog v-model:visible="displayUploadImage" modal header="Upload Scene Image" :style="{ width: '50rem' }">
+            <LocalFileUpload :scene_id="scene_id"/>
         </Dialog>
 
         <Dialog v-model:visible="displayPremiumImage" modal header="Premium AI Image Prompt Builder" :style="{ width: '50rem' }">
@@ -127,6 +123,7 @@ import axios from 'axios';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useStoryStore } from "@/stores/storyStore";
+import LocalFileUpload from "@/components/LocalFileUpload.vue"
 
 const storyStore = useStoryStore();
 const emitter = inject('emitter');
@@ -139,6 +136,7 @@ const props = defineProps({
     scene_withAudio: Boolean,
     scene_withImage: Boolean
 })
+
 const isLoading = ref(false)
 
 const advance_prompt = ref(false);
@@ -525,8 +523,11 @@ const playVoiceSample = (sampleUrl) => {
     currentAudio.value.play().catch(error => console.error('Error playing the audio:', error));
 };
 
+console.log("test image if exist", props.scene_withImage)
+
 const menu = ref();
-const items = ref([
+
+const items = computed(() => ([
     {
         label: 'Scenario',
         items: [
@@ -563,6 +564,12 @@ const items = ref([
                 command: saveSceneFreeImage
             },
             {
+                label: 'Upload From Local',
+                icon: 'pi pi-upload',
+                disabled: props.scene_prompt == 'No AI Prompt Available',
+                command: () => { displayUploadImage.value = true }
+            },
+            {
                 label: 'Clear Image',
                 icon: 'pi pi-trash',
                 command: deleteImage,
@@ -593,7 +600,7 @@ const items = ref([
             }
         ]
     },
-]);
+]));
 
 onMounted(() => {
     fetchVoices();

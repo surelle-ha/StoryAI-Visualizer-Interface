@@ -1,5 +1,5 @@
 import "primeflex/primeflex.css";
-import "primevue/resources/themes/aura-dark-amber/theme.css";
+import "primevue/resources/themes/aura-light-blue/theme.css";
 import "primevue/resources/primevue.min.css"; /* Deprecated */
 import "primeicons/primeicons.css";
 

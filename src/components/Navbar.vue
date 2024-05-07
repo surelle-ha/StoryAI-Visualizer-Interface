@@ -2,7 +2,7 @@
 <template>
     <div>
         <div class="card" v-if="storyStore.isValid">
-            <Menubar :model="items" style="border-radius: 60px;background:transparent;border:none;">
+            <Menubar :model="items" style="border-radius: 60px;background:transparent;border:none;" :baseZIndex="99999999">
                 <template #start>
                     <img src="../assets/navbar.png" width="40px" alt="logo" @click.ctrl.shift="Leave">
                 </template>
@@ -239,6 +239,8 @@ const downloadChapter = async () => {
         chapter_id: storyStore.chapter_id
     })
     .then(async response => {
+        console.log('Download response 1', response)
+        console.log('Download response 2', response.data.url)
         const url = response.data.url;
         const filename = `story_${storyStore.story_id}_chapter_${storyStore.chapter_id}.mp4`;
         const videoBlob = await fetch(url).then(response => response.blob());
@@ -254,7 +256,9 @@ const downloadChapter = async () => {
     })
     .catch(error => {
         isLoading.value = false;
+        console.log('Download response 1', error)
         toast.add({ severity: 'error', summary: 'Video Generation Error', detail: 'Failed to generate the video.', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Video Generation Error Cause', detail: error.message, life: 3000 });
     });
 }
 

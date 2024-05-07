@@ -130,10 +130,15 @@ const nextSlide = () => {
     if (images.value[activeIndex.value].audio) {
         images.value[activeIndex.value].audio.pause(); // Pause current audio
     }
-    const nextIndex = (activeIndex.value + 1) % images.value.length;
-    activeIndex.value = nextIndex;
-    playAudioForCurrentSlide();
+    const nextIndex = activeIndex.value + 1;
+    if (nextIndex < images.value.length) {
+        activeIndex.value = nextIndex;
+        playAudioForCurrentSlide();
+    } else {
+        hasStarted.value = false; // Stop the slideshow
+    }
 };
+
 
 const playAudioForCurrentSlide = () => {
     if (images.value[activeIndex.value].audio) {
@@ -237,7 +242,7 @@ const slideButtonIcon = computed(() => {
     position: absolute;
     width: 100%;
     height: 100%;
-    top: 0;
+    top: 80px;
     left: 0;
     background: rgba(0, 0, 0, 0.5); /* Optional: overlay background */
 }
