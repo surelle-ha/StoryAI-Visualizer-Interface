@@ -114,7 +114,7 @@
                         </div>
 
 
-                        <Button @click="downloadChapter" icon="pi pi-download" label="Download Chapter" :loading="isLoading"/>
+                        <Button @click="downloadChapter" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
                         <Button @click="FallbackLeave" v-if="storyStore.isValid && access_line === 'JWT'" class="p-button-sm">Go Back to Home</Button>
 

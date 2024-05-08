@@ -8,6 +8,8 @@
 				</template>
 				<template #image>
 					<img :src="imageUrl" class="header-image" alt="image" />
+					<Tag :icon="audioSrc && imageUrl != 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' && subtitle != 'No Content Available' ? 'pi pi-check' : 'pi pi-info'" :severity="audioSrc && imageUrl != 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' && subtitle != 'No Content Available' ? 'success' : 'warning'" class="absolute" style="height: 25px; left:7px; top: 7px;opacity: 0.7;"/>
+					<Tag v-if="audioSrc" :value="audioLength" severity="contrast" class="absolute" style="height: 25px; left:36px; top: 7px;opacity: 0.7;"/>
 				</template>
 				<template #preview="slotProps">
 					<img
@@ -20,7 +22,7 @@
 			</Image>
 		</template>
 		<template #title>
-			<span style="font-family: 'Roboto Slab', serif; letter-spacing: 2px">{{
+			<span style="font-family: 'Roboto Slab', serif; letter-spacing: 2px;font-size:18px">{{
 				title
 			}}</span>
 			<Button
@@ -104,6 +106,7 @@ export default {
 		const emitter = inject("emitter");
 		const audioPlayer = ref(null);
 		const audioSrc = ref(null);
+		const audioLength = ref(null);
 		const imageUrl = ref(null);
 		const displayContent = ref(false);
 		const buttonLabel = ref("Audio Available");
@@ -162,6 +165,10 @@ export default {
 				);
 				if (response.data) {
 					audioSrc.value = response.config.url;
+					const audio = new Audio(audioSrc.value);
+					audio.onloadedmetadata = () => {
+						audioLength.value = (Math.round(audio.duration * 100) / 100).toFixed(2) + "s";
+					};
 				} else {
 					audioSrc.value = null;
 				}
@@ -260,6 +267,7 @@ export default {
 			displayContent,
 			imageUrl,
 			storyStore,
+			audioLength
 		};
 	},
 };

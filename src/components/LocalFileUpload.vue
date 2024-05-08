@@ -20,12 +20,14 @@
 						<Button
 							@click="chooseCallback()"
 							icon="pi pi-images"
+							label="Open Local Files"
 							rounded
 							outlined
 						></Button>
 						<Button
 							@click="uploadEvent(uploadCallback)"
 							icon="pi pi-cloud-upload"
+							label="Uploade Selected Image"
 							rounded
 							outlined
 							severity="success"
@@ -34,23 +36,13 @@
 						<Button
 							@click="clearCallback()"
 							icon="pi pi-times"
+							label="Delete Selected Image"
 							rounded
 							outlined
 							severity="danger"
 							:disabled="!files || files.length === 0"
 						></Button>
 					</div>
-					<ProgressBar
-						:value="totalSizePercent"
-						:showValue="false"
-						:class="[
-							'md:w-20rem h-1rem w-full md:ml-auto',
-							{ 'exceeded-progress-bar': totalSizePercent > 100 },
-						]"
-						><span class="white-space-nowrap"
-							>{{ totalSize }}B / 1Mb</span
-						></ProgressBar
-					>
 				</div>
 			</template>
 			<template

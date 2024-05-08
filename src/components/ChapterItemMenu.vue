@@ -53,6 +53,10 @@
             <LocalFileUpload :scene_id="scene_id"/>
         </Dialog>
 
+        <Dialog v-model:visible="displaySelectImage" modal header="Select From AI Images" :style="{ width: '90rem' }">
+            <SelectImageUpload :scene_id="scene_id"/>
+        </Dialog>
+
         <Dialog v-model:visible="displayPremiumImage" modal header="Premium AI Image Prompt Builder" :style="{ width: '50rem' }">
             <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt. <Badge value="-5 AI Token" severity="info"></Badge></Message>
 
@@ -124,6 +128,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useStoryStore } from "@/stores/storyStore";
 import LocalFileUpload from "@/components/LocalFileUpload.vue"
+import SelectImageUpload from "@/components/SelectImageUpload.vue"
 
 const storyStore = useStoryStore();
 const emitter = inject('emitter');
@@ -492,6 +497,12 @@ const saveScenePremiumImage = async () => {
     });
 };
 
+const closeUpdateImage = () => {
+    displaySelectImage.value = false;
+}
+
+emitter.on("updateSceneCard", closeUpdateImage);
+
 const selectedvoice = ref();
 const voices = ref([]);
 const loading = ref(false);
@@ -566,8 +577,14 @@ const items = computed(() => ([
             {
                 label: 'Upload From Local',
                 icon: 'pi pi-upload',
-                disabled: props.scene_prompt == 'No AI Prompt Available',
+                disabled: false,
                 command: () => { displayUploadImage.value = true }
+            },
+            {
+                label: 'Choose From AI Images',
+                icon: 'pi pi-upload',
+                disabled: false,
+                command: () => { displaySelectImage.value = true }
             },
             {
                 label: 'Clear Image',
@@ -612,6 +629,7 @@ onMounted(() => {
 const displayEditContent = ref(false);
 const displayEditPrompt = ref(false);
 const displayUploadImage = ref(false)
+const displaySelectImage = ref(false)
 const displayPremiumNarration = ref(false)
 const displayPremiumImage = ref(false)
 

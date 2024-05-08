@@ -252,6 +252,7 @@ const slideButtonIcon = computed(() => {
     color: white; /* White color icon */
 }
 .subtitle {
+    color: white;
     font-size: 16px; /* Adjust size as needed */
     text-align: center; /* Center the subtitle text */
 }
