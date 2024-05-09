@@ -58,7 +58,7 @@
         </Dialog>
 
         <Dialog v-model:visible="displayPremiumImage" modal header="Premium AI Image Prompt Builder" :style="{ width: '50rem' }">
-            <Message severity="info" :closable="false">The output may vary depending on the creativity of your prompt. <Badge value="-5 AI Token" severity="info"></Badge></Message>
+            <Message severity="info" :closable="false">The results can differ based on the creativity of your prompt. <Badge value="-5 AI Token" severity="info"></Badge></Message>
 
             <div v-if="!advance_prompt">
                 <span class="p-text-secondary block">Header Prompt</span>
@@ -66,7 +66,7 @@
             </div>
 
             <div v-if="!advance_prompt">
-                <span class="p-text-secondary block">Enter your custom prompt. <code class="text-100" style="font-size: 15px;">Feel free to use your own format.</code></span>
+                <span class="p-text-secondary block">Enter your custom prompt. <code class="text-500" style="font-size: 15px;">Feel free to use your own format.</code></span>
                 <Textarea v-model="imageCustomPrompt" rows="5" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
             </div>
 
@@ -82,7 +82,7 @@
                 </div>
             </div>
 
-            <span class="p-text-secondary block" style="color:yellow;">Complete Prompt</span>
+            <span class="p-text-secondary block" style="color:orangered;">Complete Prompt</span>
             <Textarea v-model="combinedImageCustomPrompt" :disabled="!advance_prompt" rows="15" cols="30" class="mb-5 mt-2" autoResize="false" :style="{ width: '100%' }"/>
 
             <div class="card flex flex-wrap justify-content-center gap-3" v-if="false">
@@ -148,7 +148,7 @@ const advance_prompt = ref(false);
 const scenario_content = ref('');
 const scenario_prompt = ref('Once upon a time, ...');
 const imageCustomPrompt = ref(`Additional Information:\nArt: {\n\tStyle: ''\n},\nCharacter: [\n\t{\n\t\tName: '',\n\t\tAttribute: ''\n\t}\n],\n `);
-const imageCustomPrompt_disabled = ref('Imagine this is a kid story from a book. Create an Image Story Scene for this Scenario.');
+const imageCustomPrompt_disabled = ref(`Visualize a scene from a children's storybook. Design an illustration that brings this scenario to life. Be creative and capture the essence of a whimsical and engaging story for kids.`);
 
 const combinedImageCustomPrompt = computed(()=>(`${imageCustomPrompt_disabled.value}\n\n${imageCustomPrompt.value}\n\nStory Scene:  ${scenario_prompt.value}`))
 

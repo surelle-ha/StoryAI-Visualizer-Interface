@@ -115,6 +115,7 @@
 
 
                         <Button @click="downloadChapter(storyStore.story_id, storyStore.chapter_id)" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading_Downloading"/>
+                        <Button icon="pi pi-link" class="p-button-sm" @click="copyPlayUrl(storyStore.story_id, storyStore.chapter_id)"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
                         <Button @click="FallbackLeave" v-if="storyStore.isValid && access_line === 'JWT'" class="p-button-sm">Go Back to Home</Button>
 
@@ -246,12 +247,11 @@
                             </OverlayPanel>
                         </div>
 
-                        <Button v-if="!isPurchased" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" label="Unlock Download" :loading="isLoading_Purchasing" class="p-button-sm"/>
-                        <Button v-else @click="downloadChapter(route.query.story_id, route.query.chapter_id)" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading_Downloading"/>
+                        <Button v-if="!isPurchased && route.query.visiting_user != 'guest'" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" label="Unlock Download" :loading="isLoading_Purchasing" class="p-button-sm"/>
+                        <Button v-else-if="route.query.visiting_user != 'guest'" @click="downloadChapter(route.query.story_id, route.query.chapter_id)" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading_Downloading"/>
+                        <Button icon="pi pi-link" class="p-button-sm" @click="copyPlayUrl(route.query.story_id, route.query.chapter_id)"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
                         <Button @click="FallbackLeave" v-if="storyStore.isValid && access_line === 'JWT'" class="p-button-sm">Go Back to Home</Button>
-
-                        <Avatar image="https://cdn-icons-png.flaticon.com/512/2499/2499292.png" shape="circle" @click="toggle_User_Overlay" v-if="isAuthor || isAdmin"/>
 
                         <OverlayPanel ref="User_Overlay">
                                 <div class="flex flex-column gap-3 w-25rem">
@@ -383,6 +383,23 @@ const items = computed(() => [
     },
 ]);
 
+const copyPlayUrl = async (story_id, chapter_id) => {
+    try {
+        await navigator.clipboard.writeText(`${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/storyboard?visiting_user=guest&story_id=${story_id}&chapter_id=${chapter_id}`);
+        toast.add({
+            severity: 'info',
+            summary: 'Share URL Copied',
+            life: 3000,
+        });
+    } catch($e) {
+        toast.add({
+            severity: 'error',
+            summary: 'Cant copy share URL',
+            life: 3000,
+        });
+    }
+}
+
 const validatePurchase = async (property_of, purchase_by, story_id, chapter_id) => {
     console.log('JKASJOHWEHQWJKHEKQWJ')
     isLoading_Purchasing.value = true;
@@ -464,7 +481,7 @@ const purchaseChapter = async (property_of, purchase_by, story_id, chapter_id) =
 
     const payment = await createPaymentLink(10000, `Download Story ${story_id} and Chapter ${chapter_id} Video`, `Payment for Download Access`);
     console.log(payment.checkout_url);
-    window.open(payment.checkout_url, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
+    const paymentWindow = window.open(payment.checkout_url, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
     
     const intervalId = setInterval(async () => {
 		const result = await checkPaymentStatus(
@@ -493,7 +510,12 @@ const purchaseChapter = async (property_of, purchase_by, story_id, chapter_id) =
 
 			clearInterval(intervalId);
 		}
-        
+
+        if (paymentWindow.closed) {
+            console.log('Window has been closed!');
+            clearInterval(intervalId);
+        }
+
 	}, 5000);
 
 	setTimeout(() => {

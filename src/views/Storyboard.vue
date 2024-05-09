@@ -78,6 +78,8 @@ export default {
 		onMounted(() => {
 			//if(!storyStore.isAuthor) { router.push('/play'); }
 			fetchScenes();
+			
+			storyStore.clearStory();
 		})
 
 		emitter.on('fetchScenes', fetchScenes);
