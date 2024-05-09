@@ -16,7 +16,8 @@
             :responsiveOptions="responsiveOptions"
             :pt="{
                 root: {
-                    class: [{ 'flex flex-column': fullScreen }]
+                    class: [{ 'flex flex-column': fullScreen }],
+                    style: 'width:1200px;height:800px;'
                 },
                 content: {
                     class: ['relative', { 'flex-1 justify-content-center': fullScreen }]
@@ -28,7 +29,9 @@
                 <div class="mx-6 px-6 flex-grow-1 subtitle p-3" style="position:absolute;bottom:0;background-color: rgb(30,30,30,0.5);border-radius: 25px;" v-if="images[activeIndex].subtitle">
                     <div v-html="images[activeIndex].subtitle"></div>
                 </div>
-                <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }]" />
+                <div class="image-container">
+                    <img class="image-content" :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }] + 'width:1200px;'" />
+                </div>
             </template>
             <template #thumbnail="slotProps">
                 <div class="grid grid-nogutter justify-content-center">
@@ -106,6 +109,8 @@ onMounted(async () => {
     } catch (error) {
         console.error('Error fetching images:', error);
     }
+    
+    storyStore.clearStory();
 });
 
 function setupAudioHandlers() {
@@ -215,6 +220,27 @@ const slideButtonIcon = computed(() => {
 
 
 <style scoped>
+.image-container {
+    width: 1200px; 
+    height: 624px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: block;
+    margin: auto;
+    background-color: black; 
+}
+
+.image-content {
+    max-width: 1024px;
+    height: 624px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: block;
+    margin: auto;
+}
+
 .card {
     background: var(--surface-card);
     padding: 2rem;
@@ -239,7 +265,7 @@ const slideButtonIcon = computed(() => {
     position: absolute;
     width: 100%;
     height: 100%;
-    top: 0;
+    top: 80px;
     left: 0;
     background: rgba(0, 0, 0, 0.5); /* Optional: overlay background */
 }
@@ -249,6 +275,7 @@ const slideButtonIcon = computed(() => {
     color: white; /* White color icon */
 }
 .subtitle {
+    color: white;
     font-size: 16px; /* Adjust size as needed */
     text-align: center; /* Center the subtitle text */
 }

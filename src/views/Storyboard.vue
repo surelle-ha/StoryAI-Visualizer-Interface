@@ -25,7 +25,7 @@ import Spinner from "../components/Spinner.vue";
 import { inject, ref, onMounted, computed } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
 import { useToast } from "primevue/usetoast";
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 export default {
 	name: "Visualizer",
@@ -38,12 +38,13 @@ export default {
 		const emitter = inject('emitter');
 		const storyStore = useStoryStore();
 		const router = useRouter();
+		const route = useRoute();
   		const toast = useToast();
 		const scenes = ref([]);
         const isLoading = ref(true);
 		
-		const story_id = storyStore.story_id;
-		const chapter_id = storyStore.chapter_id;
+		const story_id = route.query.story_id;
+		const chapter_id = route.query.chapter_id;
 		console.log('test:', story_id)
 
 		const fetchScenes = async () => {

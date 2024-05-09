@@ -16,7 +16,8 @@
             :responsiveOptions="responsiveOptions"
             :pt="{
                 root: {
-                    class: [{ 'flex flex-column': fullScreen }]
+                    class: [{ 'flex flex-column': fullScreen }],
+                    style: 'width:1200px;height:800px;'
                 },
                 content: {
                     class: ['relative', { 'flex-1 justify-content-center': fullScreen }]
@@ -25,18 +26,22 @@
             }"
         >
             <template #item="slotProps">
+                
                 <div class="mx-6 px-6 flex-grow-1 subtitle p-3" style="position:absolute;bottom:0;background-color: rgb(30,30,30,0.5);border-radius: 25px;" v-if="images[activeIndex].subtitle">
                     <div v-html="images[activeIndex].subtitle"></div>
                 </div>
-                <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }]" />
+                <div class="image-container">
+                    <img class="image-content" :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }] + 'width:1200px;'" />
+                </div>
+                
             </template>
-            <template #thumbnail="slotProps">
-                <div class="grid grid-nogutter justify-content-center">
-                    <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt" style="display: block" />
+            <template #thumbnail="slotProps" >
+                <div class="grid grid-nogutter justify-content-center" >
+                    <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt" style="display: block;" />
                 </div>
             </template>
             <template #footer>
-                <div class="flex align-items-center bg-black-alpha-90 text-white">
+                <div class="flex align-items-center bg-black-alpha-90 text-white" >
                     <Button icon="pi pi-list" @click="onThumbnailButtonClick" :pt="{ root: { class: 'border-none border-noround hover:bg-white-alpha-10 text-white', style: 'background: transparent' } }" />
                     <Button :icon="slideButtonIcon" @click="toggleAutoSlide" :pt="{ root: { class: 'border-none border-noround hover:bg-white-alpha-10 text-white', style: 'background: transparent' } }" />
                     <span v-if="images" class="title-container">
@@ -218,6 +223,27 @@ const slideButtonIcon = computed(() => {
 
 
 <style scoped>
+.image-container {
+    width: 1200px; 
+    height: 624px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: block;
+    margin: auto;
+    background-color: black; 
+}
+
+.image-content {
+    max-width: 1024px;
+    height: 624px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: block;
+    margin: auto;
+}
+
 .card {
     background: var(--surface-card);
     padding: 2rem;

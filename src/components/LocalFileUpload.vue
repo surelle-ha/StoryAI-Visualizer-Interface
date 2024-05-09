@@ -27,7 +27,7 @@
 						<Button
 							@click="uploadEvent(uploadCallback)"
 							icon="pi pi-cloud-upload"
-							label="Uploade Selected Image"
+							label="Upload Selected Image"
 							rounded
 							outlined
 							severity="success"

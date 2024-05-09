@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, useRouter } from 'vue-router';
 import Home from '../views/Home.vue';
 import Visualizer from '../views/Visualizer.vue';
+import Storyboard from '../views/Storyboard.vue';
 import Public_Images from '../views/Public_Images.vue';
 import Play from '../views/Play.vue';
 import Watch from '../views/Watch.vue';
@@ -58,6 +59,11 @@ const routes = [
         name: 'Play',
         component: Play,
         beforeEnter: requireStory,
+    },
+    {
+        path: '/Storyboard',
+        name: 'Storyboard',
+        component: Storyboard,
     },
     {
         path: '/watch',

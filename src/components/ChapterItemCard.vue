@@ -98,8 +98,12 @@ import ChapterItemMenu from "./ChapterItemMenu.vue";
 
 export default {
 	components: { Card, Button, ChapterItemMenu },
-	props: ["scenario"],
-	setup(scenario) {
+	props: {
+		story_id: String,
+		chapter_id: String,
+		scenario: String,
+	},
+	setup(props) {
 		const toast = useToast();
 		const storyStore = useStoryStore();
 		const audioStore = useAudioStore();
@@ -111,7 +115,9 @@ export default {
 		const displayContent = ref(false);
 		const buttonLabel = ref("Audio Available");
 
-		const scene = scenario.scenario.replace("Scene_", "");
+		const story_id = props.story_id;
+		const chapter_id = props.chapter_id; 
+		const scene = props.scenario.replace("Scene_", "");
 
 		const title = ref("Loading Title");
 		const subtitle = ref("Loading Sub-title");
@@ -125,8 +131,8 @@ export default {
 				const response = await axios.post(
 					`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/content/fetch`,
 					{
-						story_id: storyStore.story_id,
-						chapter_id: storyStore.chapter_id,
+						story_id: story_id,
+						chapter_id: chapter_id,
 						scene_id: scene,
 					}
 				);
@@ -146,8 +152,8 @@ export default {
 				const response = await axios.post(
 					`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/prompt/fetch`,
 					{
-						story_id: storyStore.story_id,
-						chapter_id: storyStore.chapter_id,
+						story_id: story_id,
+						chapter_id: chapter_id,
 						scene_id: scene,
 					}
 				);
@@ -161,7 +167,7 @@ export default {
 		const fetchAudioUrl = async () => {
 			try {
 				const response = await axios.get(
-					`${process.env.VUE_APP_BACKEND_API_URL}/api/scene/narrate/fetch?story_id=${storyStore.story_id}&chapter_id=${storyStore.chapter_id}&scene_id=${scene}`
+					`${process.env.VUE_APP_BACKEND_API_URL}/api/scene/narrate/fetch?story_id=${story_id}&chapter_id=${chapter_id}&scene_id=${scene}`
 				);
 				if (response.data) {
 					audioSrc.value = response.config.url;
@@ -199,8 +205,8 @@ export default {
 					`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/get`,
 					{
 						params: {
-							story_id: storyStore.story_id,
-							chapter_id: storyStore.chapter_id,
+							story_id: story_id,
+							chapter_id: chapter_id,
 							scene_id: scene,
 						},
 					}
