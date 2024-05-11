@@ -247,7 +247,7 @@
                             </OverlayPanel>
                         </div>
 
-                        <Button v-if="!isPurchased && route.query.visiting_user != 'guest'" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" label="Unlock Download" :loading="isLoading_Purchasing" class="p-button-sm"/>
+                        <Button v-if="!isPurchased && route.query.visiting_user != 'guest'" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" :label="'Unlock Download for Php ' + (sceneCount * 5 + 100)" :loading="isLoading_Purchasing" class="p-button-sm"/>
                         <Button v-else-if="route.query.visiting_user != 'guest'" @click="downloadChapter(route.query.story_id, route.query.chapter_id)" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading_Downloading"/>
                         <Button icon="pi pi-link" class="p-button-sm" @click="copyPlayUrl(route.query.story_id, route.query.chapter_id)"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
@@ -293,6 +293,7 @@ const isAdmin = computed(() => storyStore.isAdmin);
 const access_points = computed(() => storyStore.access_points);
 const access_line = computed(() => storyStore.access_line);
 
+const sceneCount = ref(0);
 const admin_token_access_id = ref('');
 const isPurchased = ref(false);
 
@@ -382,6 +383,13 @@ const items = computed(() => [
         show: storyStore.isValid
     },
 ]);
+
+const getSceneCount = async (story_id, chapter_id) => {
+    const params = new URLSearchParams({ story_id, chapter_id }).toString();
+    const url = `${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/getCount?${params}`;
+    const response = await axios.get(url);
+    sceneCount.value = response.data.scenes.length;
+}
 
 const copyPlayUrl = async (story_id, chapter_id) => {
     try {
@@ -479,7 +487,7 @@ const createPaymentLink = (amount, description, remarks) => {
 const purchaseChapter = async (property_of, purchase_by, story_id, chapter_id) => {
     isLoading_Purchasing.value = true;
 
-    const payment = await createPaymentLink(10000, `Download Story ${story_id} and Chapter ${chapter_id} Video`, `Payment for Download Access`);
+    const payment = await createPaymentLink((sceneCount.value * 5 + 100) * 100, `Download Story ${story_id} and Chapter ${chapter_id} Video`, `Payment for Download Access`);
     console.log(payment.checkout_url);
     const paymentWindow = window.open(payment.checkout_url, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
     
@@ -512,8 +520,10 @@ const purchaseChapter = async (property_of, purchase_by, story_id, chapter_id) =
 		}
 
         if (paymentWindow.closed) {
-            console.log('Window has been closed!');
+
             clearInterval(intervalId);
+            isLoading_Purchasing.value = false;
+            console.log('Window has been closed!');
         }
 
 	}, 5000);
@@ -614,12 +624,12 @@ onMounted(() => {
 
         if (route.query.visiting_user && route.query.story_id && route.query.chapter_id) {
             console.log("Validating purchase...");
+            getSceneCount(route.query.story_id, route.query.chapter_id)
             await validatePurchase('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id);
         } else {
             console.log("Missing required query parameters for validating purchase.");
         }
     }, 0)
-    
 
     get_user_count();
     get_story_count();
