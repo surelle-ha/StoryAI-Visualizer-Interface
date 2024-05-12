@@ -1,5 +1,5 @@
 <template>
-    <div class="card flex justify-content-center">
+    <div class="card flex justify-content-center" v-if="storyStore.isValid">
       <Button type="button" icon="pi pi-image" label="Scenes" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"/>
       <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
     </div>
