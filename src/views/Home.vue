@@ -108,6 +108,7 @@ const story_id = ref(null);
 const chapter_id = ref(null);
 const isAuthor = ref(true);
 const isAdmin = ref(true);
+const fallbackUrl = ref('')
 const accessLine = ref('Form')
 
 const encodedJwt = ref(null);
@@ -147,6 +148,11 @@ onMounted(() => {
         chapter_id.value = decodedJwt.value.payload.chapter_id,
         isAuthor.value = decodedJwt.value.payload.isAuthor,
         isAdmin.value = decodedJwt.value.payload.isAdmin
+
+        fallbackUrl.value = decodedJwt.value.payload.fallbackUrl;
+        if(fallbackUrl.value){
+          localStorage.setItem('fallbackUrl', fallbackUrl.value);
+        }
 
         accessLine.value = "JWT";
 

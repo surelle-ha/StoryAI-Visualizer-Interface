@@ -321,7 +321,8 @@ const Leave = () => {
 
 const FallbackLeave = () => {
     storyStore.clearStory();
-    window.location.href = (process.env.VUE_APP_FALLBACK_EXIT_URL) // Fallback URL
+    //window.location.href = (process.env.VUE_APP_FALLBACK_EXIT_URL) // Fallback URL
+    window.location.href = localStorage.getItem('fallbackUrl')
 }
 
 emitter.on('Leave', Leave);
