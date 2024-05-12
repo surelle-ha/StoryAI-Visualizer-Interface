@@ -247,7 +247,7 @@
                             </OverlayPanel>
                         </div>
 
-                        <Button v-if="!isPurchased && route.query.visiting_user != 'guest'" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" :label="'Unlock Download for Php ' + (sceneCount * 5 + 100)" :loading="isLoading_Purchasing" class="p-button-sm"/>
+                        <Button v-if="!isPurchased && route.query.visiting_user != 'guest'" @click="purchaseChapter('1', route.query.visiting_user, route.query.story_id, route.query.chapter_id)" icon="pi pi-shop" :label="'Unlock Download for Php ' + ((sceneCount * 5) > 100 ? (sceneCount * 5) : 100)" :loading="isLoading_Purchasing" class="p-button-sm"/>
                         <Button v-else-if="route.query.visiting_user != 'guest'" @click="downloadChapter(route.query.story_id, route.query.chapter_id)" icon="pi pi-download" class="p-button-sm" label="Download Chapter" :loading="isLoading_Downloading"/>
                         <Button icon="pi pi-link" class="p-button-sm" @click="copyPlayUrl(route.query.story_id, route.query.chapter_id)"/>
                         <Button @click="Leave" v-if="storyStore.isValid && access_line === 'Form'" class="p-button-sm">Leave</Button>
@@ -487,7 +487,7 @@ const createPaymentLink = (amount, description, remarks) => {
 const purchaseChapter = async (property_of, purchase_by, story_id, chapter_id) => {
     isLoading_Purchasing.value = true;
 
-    const payment = await createPaymentLink((sceneCount.value * 5 + 100) * 100, `Download Story ${story_id} and Chapter ${chapter_id} Video`, `Payment for Download Access`);
+    const payment = await createPaymentLink(((sceneCount.value * 5) > 100 ? (sceneCount.value * 5) : 100) * 100, `Download Story ${story_id} and Chapter ${chapter_id} Video`, `Payment for Download Access`);
     console.log(payment.checkout_url);
     const paymentWindow = window.open(payment.checkout_url, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
     
