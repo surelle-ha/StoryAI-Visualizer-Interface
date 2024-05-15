@@ -9,7 +9,7 @@
     <div class="container" v-else>
         <div class="row my-5">
             <div class="card">
-                <Message :closable="false" severity="info">Public Published AI Generated Images</Message>
+                <Message :closable="false" severity="info">Your AI Generated Images</Message>
             </div>
         </div>
         <div class="card justify-content-center">
@@ -70,7 +70,7 @@ const displayCustom = ref(false);
 
 onMounted(async () => {
     try {
-        const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/public/fetch`);
+        const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/image/${storyStore.access_id}/fetch`);
         images.value = response.data.map(url => ({
             itemImageSrc: url,
             thumbnailImageSrc: url,

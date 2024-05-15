@@ -374,7 +374,7 @@ const items = computed(() => [
         route: 'public-images',
         icon: 'pi pi-image',
         actionType: 'route', 
-        show: storyStore.isAuthor
+        show: false
     },
     {
         label: 'Play',
