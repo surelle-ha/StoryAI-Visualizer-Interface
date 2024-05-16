@@ -2,7 +2,7 @@
     <div class="container p-5">
 
 		<div class="card flex justify-content-center">
-			<h1 class="w-100 flex-justify-center" style="letter-spacing: 5px; font-family: 'Roboto Slab', serif;">Chapter {{ chapter_id }}</h1>
+			<h1 class="w-100 flex-justify-center" style="letter-spacing: 5px; font-family: 'Roboto Slab', serif;">{{ storyStore.chapter_title == null ? 'Chapter ' + storyStore.chapter_id : storyStore.chapter_title }}</h1>
 		</div>
 
         <ProgressSpinner v-if="isLoading" style="width: 50px; height: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
@@ -44,6 +44,7 @@ export default {
 		
 		const story_id = storyStore.story_id;
 		const chapter_id = storyStore.chapter_id;
+		const chapter_title = storyStore.chapter_title;
 		console.log('test:', story_id)
 
 		const fetchScenes = async () => {
@@ -86,7 +87,8 @@ export default {
 			fetchScenes,
             isLoading,
 			story_id,
-			chapter_id
+			chapter_id,
+			storyStore
 		};
 	}
 };

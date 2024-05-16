@@ -6,6 +6,7 @@ export const useStoryStore = defineStore('storyStore', {
         access_id: localStorage.getItem('access_id') || null,
         story_id: localStorage.getItem('story_id') || null,
         chapter_id: localStorage.getItem('chapter_id') || null,
+        chapter_title: localStorage.getItem('chapter_title') || null,
         isAuthor: localStorage.getItem('isAuthor') === 'true', // Assuming isAuthor and isAdmin are booleans
         isAdmin: localStorage.getItem('isAdmin') === 'true',
         access_points: localStorage.getItem('access_points') || 0,
@@ -30,6 +31,10 @@ export const useStoryStore = defineStore('storyStore', {
             this.chapter_id = id;
             localStorage.setItem('chapter_id', id);
         },
+        updateChapterTitle(title) {
+            this.chapter_title = title;
+            localStorage.setItem('chapter_title', title);
+        },
         updateAuthor(state) {
             this.isAuthor = state;
             localStorage.setItem('isAuthor', state.toString());
@@ -46,7 +51,7 @@ export const useStoryStore = defineStore('storyStore', {
             this.access_line = line;
             localStorage.setItem('access_line', line);
         },
-        async initializeStory(accessId, storyId, chapterId, isAuthor, isAdmin, accessLine) {
+        async initializeStory(accessId, storyId, chapterId, chapterTitle, isAuthor, isAdmin, accessLine) {
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
                     access_id: accessId,
@@ -58,6 +63,7 @@ export const useStoryStore = defineStore('storyStore', {
                     this.updateAccessId(accessId);
                     this.updateStoryId(storyId);
                     this.updateChapterId(chapterId);
+                    this.updateChapterTitle(chapterTitle);
                     this.updateAuthor(isAuthor);
                     this.updateAdmin(isAdmin);
                     this.updateAccessPoints(response.data.access.points);
@@ -75,6 +81,7 @@ export const useStoryStore = defineStore('storyStore', {
             localStorage.removeItem('access_id');
             localStorage.removeItem('story_id');
             localStorage.removeItem('chapter_id');
+            localStorage.removeItem('chapter_title');
             localStorage.removeItem('isAuthor');
             localStorage.removeItem('isAdmin');
             localStorage.removeItem('access_points');

@@ -106,6 +106,7 @@ const app_title = ref(process.env.VUE_APP_TITLE);
 const access_id = ref(null);
 const story_id = ref(null);
 const chapter_id = ref(null);
+const chapter_title = ref(null);
 const isAuthor = ref(true);
 const isAdmin = ref(true);
 const fallbackUrl = ref('')
@@ -146,6 +147,7 @@ onMounted(() => {
         access_id.value = decodedJwt.value.payload.access_id,
         story_id.value = decodedJwt.value.payload.story_id,
         chapter_id.value = decodedJwt.value.payload.chapter_id,
+        chapter_title.value = decodedJwt.value.payload.chapter_title,
         isAuthor.value = decodedJwt.value.payload.isAuthor,
         isAdmin.value = decodedJwt.value.payload.isAdmin
 
@@ -166,7 +168,7 @@ onMounted(() => {
 async function sendData() {
   storyStore.clearStory();
   loading.value = true; // Activate spinner before sending data
-  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value ,isAuthor.value, isAdmin.value, accessLine.value);
+  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value, chapter_title.value ,isAuthor.value, isAdmin.value, accessLine.value);
   loading.value = false; // Deactivate spinner after receiving response
   if (storyStore.access_id && storyStore.story_id && storyStore.chapter_id) {
     toast.add({ severity: 'success', summary: 'Initialized', detail: 'Successfully connected to server.', life: 3000 });
