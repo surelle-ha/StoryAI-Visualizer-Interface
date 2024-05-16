@@ -1,10 +1,5 @@
 <template>
     <div class="container p-5">
-
-		<div class="card flex justify-content-center">
-			<h1 class="w-100 flex-justify-center" style="letter-spacing: 5px; font-family: 'Roboto Slab', serif;">Chapter {{ chapter_id }}</h1>
-		</div>
-
         <ProgressSpinner v-if="isLoading" style="width: 50px; height: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
                          strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" aria-label="Loading scenarios"/>
         <div class="cards-container" v-if="scenes.length && !isLoading">

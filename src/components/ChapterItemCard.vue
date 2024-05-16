@@ -1,5 +1,5 @@
 <template>
-	<Card style="width: 25rem; overflow: hidden">
+	<Card :style="storyStore.isValid ? 'width: 25rem; overflow: hidden' : 'width: 33rem; overflow: hidden'">
 		{{ scene }}
 		<template #header>
 			<Image alt="Image" class="header-image" preview>
@@ -22,7 +22,7 @@
 			</Image>
 		</template>
 		<template #title>
-			<span style="font-family: 'Roboto Slab', serif; letter-spacing: 2px;font-size:18px">{{
+			<span style="font-family: 'Roboto Slab', serif; letter-spacing: 2px;font-size:18px" v-if="storyStore.isValid">{{
 				title
 			}}</span>
 			<Button
@@ -30,6 +30,7 @@
 				icon="pi pi-book"
 				label="View Content"
 				class="ml-4 mr-2 custom-small-button"
+				v-if="storyStore.isValid"
 			/>
 			<Button
 				@click="playAudio"
@@ -41,6 +42,7 @@
 			<audio ref="audioPlayer" :src="audioSrc" hidden v-if="audioSrc"></audio>
 		</template>
 		<template #subtitle>
+			<span v-html="subtitle" v-if="!storyStore.isValid"></span>
 			<Dialog
 				v-model:visible="displayContent"
 				modal
@@ -60,7 +62,7 @@
 			</Dialog>
 		</template>
 		<template #content>
-			<p class="m-0 truncate">
+			<p class="m-0 truncate" v-if="storyStore.isValid">
 				{{ content }}
 			</p>
 		</template>

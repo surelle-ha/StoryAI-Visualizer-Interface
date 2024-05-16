@@ -137,9 +137,13 @@ const nextSlide = () => {
     if (images.value[activeIndex.value].audio) {
         images.value[activeIndex.value].audio.pause(); // Pause current audio
     }
-    const nextIndex = (activeIndex.value + 1) % images.value.length;
-    activeIndex.value = nextIndex;
-    playAudioForCurrentSlide();
+    const nextIndex = activeIndex.value + 1;
+    if (nextIndex < images.value.length) {
+        activeIndex.value = nextIndex;
+        playAudioForCurrentSlide();
+    } else {
+        hasStarted.value = false; // Stop the slideshow
+    }
 };
 
 const playAudioForCurrentSlide = () => {
