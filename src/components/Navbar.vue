@@ -4,7 +4,7 @@
         <div class="card" v-if="storyStore.isValid">
             <Menubar :model="items" style="border-radius: 60px;background:transparent;border:none;" :baseZIndex="99999999">
                 <template #start>
-                    <img src="../assets/navbar.png" width="40px" alt="logo" @click.ctrl.shift="Leave">
+                    <img src="../assets/navbar.png" style="margin-top:5px;" width="80px" alt="logo" @click.ctrl.shift="Leave">
                 </template>
                 <template #item="{ item, props, hasSubmenu, root }">
                     <component
@@ -138,7 +138,7 @@
         <div class="card" v-else>
             <Menubar :model="items" style="border-radius: 60px;background:transparent;border:none;" :baseZIndex="99999999">
                 <template #start>
-                    <img src="../assets/navbar.png" width="40px" alt="logo" @click.ctrl.shift="Leave">
+                    <img src="../assets/navbar.png" style="margin-top:5px;" width="80px" alt="logo" @click.ctrl.shift="Leave">
                 </template>
                 <template #item="{ item, props, hasSubmenu, root }">
                     <component
@@ -341,14 +341,14 @@ watch(isAuthor, (newVal, oldVal) => {
 
 const items = computed(() => [
     {
-        label: process.env.VUE_APP_TITLE + ' Studio',
+        label: 'Storyboard',
         route: 'visualizer',
         icon: 'pi pi-star',
         actionType: 'route', 
         show: storyStore.isValid
     },
     {
-        label: process.env.VUE_APP_TITLE + ' Studio',
+        label: 'Storyboard',
         route: 'storyboard?visiting_user=' + route.query.visiting_user + '&story_id=' + route.query.story_id + '&chapter_id=' + route.query.chapter_id,
         icon: 'pi pi-star',
         actionType: 'route', 
