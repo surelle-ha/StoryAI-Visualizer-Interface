@@ -352,7 +352,7 @@ const items = computed(() => [
         route: 'admin',
         icon: 'pi pi-lock',
         actionType: 'route', 
-        show: storyStore.isAdmin
+        show: storyStore.isAdmin && false
     },
     {
         label: 'Storyboard',

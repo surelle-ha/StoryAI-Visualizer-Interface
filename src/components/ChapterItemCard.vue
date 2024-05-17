@@ -1,5 +1,5 @@
 <template>
-	<Card :style="storyStore.isValid ? 'width: 25rem; overflow: hidden' : 'width: 33rem; overflow: hidden'">
+	<Card style="width: 25rem; overflow: hidden">
 		{{ scene }}
 		<template #header>
 			<Image alt="Image" class="header-image" preview>
