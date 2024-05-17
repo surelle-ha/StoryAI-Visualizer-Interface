@@ -27,7 +27,7 @@
         >
             <template #item="slotProps">
                 
-                <div class="mx-6 px-6 flex-grow-1 subtitle p-3" style="position:absolute;bottom:0;background-color: rgb(30,30,30,0.5);border-radius: 25px;" v-if="images[activeIndex].subtitle">
+                <div class="mx-6 px-6 flex-grow-1 subtitle p-3" style="color: white; position:absolute;bottom:0;background-color: rgb(30,30,30,0.5);border-radius: 25px;" v-if="images[activeIndex].subtitle">
                     <div v-html="images[activeIndex].subtitle"></div>
                 </div>
                 <div class="image-container">
