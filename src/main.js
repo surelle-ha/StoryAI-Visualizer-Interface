@@ -117,6 +117,7 @@ import TreeTable from 'primevue/treetable';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
 import Editor from 'primevue/editor';
+import Chart from 'primevue/chart';
 
 const app = createApp(App);
 const emitter = mitt()
@@ -235,6 +236,7 @@ app.component('TreeSelect', TreeSelect);
 app.component('TreeTable', TreeTable);
 app.component('TriStateCheckbox', TriStateCheckbox);
 app.component('VirtualScroller', VirtualScroller);
+app.component('Chart', Chart);
 
 app.provide('emitter', emitter); 
 app.mount("#app");

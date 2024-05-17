@@ -11,6 +11,7 @@
     "@toruslabs/eccrypto": "^4.0.0",
     "@vueuse/integrations": "^10.9.0",
     "axios": "^1.6.8",
+    "chart.js": "^4.4.2",
     "crypto": "^1.0.1",
     "date-fns": "^3.6.0",
     "firebase": "^10.10.0",

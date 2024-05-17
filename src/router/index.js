@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, useRouter } from 'vue-router';
 import Home from '../views/Home.vue';
+import Admin from '../views/Admin.vue';
 import Visualizer from '../views/Visualizer.vue';
 import Storyboard from '../views/Storyboard.vue';
 import Public_Images from '../views/Public_Images.vue';
@@ -46,6 +47,12 @@ const routes = [
         path: '/Visualizer',
         name: 'Visualizer',
         component: Visualizer,
+        beforeEnter: requireStory,
+    },
+    {
+        path: '/admin',
+        name: 'Admin',
+        component: Admin,
         beforeEnter: requireStory,
     },
     {

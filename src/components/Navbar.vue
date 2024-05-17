@@ -32,8 +32,8 @@
                                 <div class="flex flex-column gap-3 w-25rem">
                                     <div>
                                         <span class="font-medium text-900 block mb-2">Administrative Tools</span>
-                                        <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                         <TabView>
+                                            <!--
                                             <TabPanel header="Welcome">
                                                 <div class="surface-section px-4 py-8">
                                                     <div class="text-700 text-center">
@@ -44,6 +44,7 @@
                                                     </div>
                                                 </div>
                                             </TabPanel>
+                                            -->
                                             <TabPanel header="Statistics">
                                                 
                                                 <div class="surface-section py-3">
@@ -70,9 +71,6 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="mt-3 lg:mt-0">
-                                                            <Button label="Save" icon="pi pi-check"></Button>
-                                                        </div>
                                                     </div>
                                                 </div>
                                                 
@@ -86,10 +84,13 @@
                                                                 <label for="access_id" class="font-semibold w-6rem">Access ID</label>
                                                                 <InputText v-model="admin_token_access_id" id="access_id" class="flex-auto" autocomplete="off" />
                                                             </FloatLabel>
-                                                            <InlineMessage severity="info" class="mb-4" v-if="token_change_update.message">{{ token_change_update.message }}</InlineMessage>
+                                                            <FloatLabel class="flex align-items-center gap-3 mb-4 mt-2">
+                                                                <label for="admin_token_amount" class="font-semibold w-6rem">Amount</label>
+                                                                <InputText v-model="admin_token_amount" id="admin_token_amount" class="flex-auto" autocomplete="off" />
+                                                            </FloatLabel>
                                                             <div class="flex justify-content-end gap-2">
-                                                                <Button type="button" severity="danger" label="-100" @click="tokenDeduct(admin_token_access_id, 100)"></Button>
-                                                                <Button type="button" severity="success" label="+100" @click="tokenFund(admin_token_access_id, 100)"></Button>
+                                                                <Button type="button" severity="danger" label="Deduct" @click="tokenDeduct(admin_token_access_id, admin_token_amount)"></Button>
+                                                                <Button type="button" severity="success" label="Add" @click="tokenFund(admin_token_access_id, admin_token_amount)"></Button>
                                                             </div>
                                                         </div>
                                                     </AccordionTab>
@@ -125,7 +126,6 @@
                                 <div class="flex flex-column gap-3 w-25rem">
                                     <div>
                                         <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'VSID #' + access_id"></Tag></span>
-                                        <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                         <span>AI Tokens: {{ access_points }}</span><br>
                                         <Button label="Add 50 AI Token" icon="pi pi-dollar" class="p-button-sm bt-4" @click="tokenFund(storyStore.access_id, 50)"  v-if="isAdmin"/>
                                     </div>
@@ -166,7 +166,6 @@
                                 <div class="flex flex-column gap-3 w-25rem">
                                     <div>
                                         <span class="font-medium text-900 block mb-2">Administrative Tools</span>
-                                        <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                         <TabView>
                                             <TabPanel header="Welcome">
                                                 <div class="surface-section px-4 py-8">
@@ -257,7 +256,6 @@
                                 <div class="flex flex-column gap-3 w-25rem">
                                     <div>
                                         <span class="font-medium text-900 block mb-2">Author Account <Tag severity="success" :value="'VSID #' + access_id"></Tag></span>
-                                        <span class="font-medium text-200 block mb-2">Coming Soon!</span>
                                         <span>AI Tokens: {{ access_points }}</span><br>
                                         <Button label="Add 50 AI Token" icon="pi pi-dollar" class="p-button-sm bt-4" @click="tokenFund(storyStore.access_id, 50)"  v-if="isAdmin"/>
                                     </div>
@@ -295,6 +293,7 @@ const access_line = computed(() => storyStore.access_line);
 
 const sceneCount = ref(0);
 const admin_token_access_id = ref('');
+const admin_token_amount = ref(100);
 const isPurchased = ref(false);
 
 const user_count = ref();
@@ -346,6 +345,14 @@ const items = computed(() => [
         icon: 'pi pi-star',
         actionType: 'route', 
         show: storyStore.isValid
+    },
+    {
+        
+        label: 'Admin',
+        route: 'admin',
+        icon: 'pi pi-lock',
+        actionType: 'route', 
+        show: storyStore.isAdmin
     },
     {
         label: 'Storyboard',
