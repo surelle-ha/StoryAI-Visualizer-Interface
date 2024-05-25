@@ -59,14 +59,19 @@
                   <InputText type="text" id="access_id" v-model="access_id" class="flex-auto" autocomplete="off" />
                 </div>
 
-                <div class="flex align-items-center gap-3 mb-3">
+                <div class="flex align-items-center gap-3 mb-5">
+                  <label for="access_name" class="font-semibold w-8rem">Access Name</label>
+                  <InputText type="text" id="access_name" v-model="access_name" class="flex-auto" autocomplete="off" />
+                </div>
+
+                <div class="flex align-items-center gap-3 mb-5">
                   <label for="story_id" class="font-semibold w-8rem">Story ID</label>
                   <InputText type="number" id="story_id" v-model="story_id" class="flex-auto" autocomplete="off" />
                 </div>
-                
-                <div class="flex align-items-center gap-3 mb-5">
-                  <label for="chapter_id" class="font-semibold w-8rem">Chapter ID</label>
-                  <InputText type="number" id="chapter_id" v-model="chapter_id" class="flex-auto" autocomplete="off" />
+
+                <div class="flex align-items-center gap-3 mb-3">
+                  <label for="story_name" class="font-semibold w-8rem">Story Name</label>
+                  <InputText type="text" id="story_name" v-model="story_name" class="flex-auto" autocomplete="off" />
                 </div>
 
                 <div class="row">
@@ -104,8 +109,9 @@ const origin = ref(window.location.origin)
 
 const app_title = ref(process.env.VUE_APP_TITLE);
 const access_id = ref(null);
+const access_name = ref(null);
 const story_id = ref(null);
-const chapter_id = ref(null);
+const story_name = ref(null);
 const chapter_title = ref(null);
 const isAuthor = ref(true);
 const isAdmin = ref(true);
@@ -132,8 +138,9 @@ function closeDialog() {
 
 onMounted(() => {
     access_id.value = (route.query.access_id) || ('999')
+    access_name.value = (route.query.access_name) || ('User Test')
     story_id.value = route.query.story_id || 1
-    chapter_id.value = route.query.chapter_id || 1
+    story_name.value = (route.query.story_name) || ('Story Test')
     isAuthor.value = route.query.isAuthor === 'true'
     isAdmin.value = route.query.isAdmin === 'true'
     accessLine.value = route.query.accessLine || "Form"
@@ -145,8 +152,9 @@ onMounted(() => {
         decodedJwt.value = { header, payload };
 
         access_id.value = decodedJwt.value.payload.access_id,
+        access_name.value = decodedJwt.value.payload.access_name,
         story_id.value = decodedJwt.value.payload.story_id,
-        chapter_id.value = decodedJwt.value.payload.chapter_id,
+        story_name.value = decodedJwt.value.payload.story_name,
         chapter_title.value = decodedJwt.value.payload.chapter_title,
         isAuthor.value = decodedJwt.value.payload.isAuthor,
         isAdmin.value = decodedJwt.value.payload.isAdmin
@@ -168,11 +176,11 @@ onMounted(() => {
 async function sendData() {
   storyStore.clearStory();
   loading.value = true; // Activate spinner before sending data
-  let response = await storyStore.initializeStory(access_id.value, story_id.value, chapter_id.value, chapter_title.value ,isAuthor.value, isAdmin.value, accessLine.value);
+  let response = await storyStore.initializeStory(access_id.value, access_name.value, story_id.value, story_name.value, 1, chapter_title.value ,isAuthor.value, isAdmin.value, accessLine.value);
   loading.value = false; // Deactivate spinner after receiving response
-  if (storyStore.access_id && storyStore.story_id && storyStore.chapter_id) {
+  if (storyStore.access_id && storyStore.access_name && storyStore.story_id && storyStore.story_name) {
     toast.add({ severity: 'success', summary: 'Initialized', detail: 'Successfully connected to server.', life: 3000 });
-    console.log('Story initialized with ID:', storyStore.story_id, 'and Chapter ID:', storyStore.chapter_id);
+    console.log('Story initialized with ID:', storyStore.story_id);
     closeDialog();
 
     router.push({name: 'Visualizer'});

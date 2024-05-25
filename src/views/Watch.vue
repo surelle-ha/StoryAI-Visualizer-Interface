@@ -79,7 +79,7 @@ const chapter_id = computed(() => route.query.chapter_id);
 
 onMounted(async () => {
     try {
-        const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/fetch`, { story_id: story_id.value, chapter_id: chapter_id.value });
+        const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/v2/fetch`, { story_id: story_id.value, chapter_id: chapter_id.value });
         const fetchSubtitlesPromises = Object.values(response.data).map(scene => axios.get(scene.context));
         const subtitlesResponses = await Promise.all(fetchSubtitlesPromises);
         images.value = Object.values(response.data).map((scene, index) => ({
@@ -88,6 +88,7 @@ onMounted(async () => {
             alt: 'Scene image',
             title: 'Scene',
             narrationUrl: scene.sound,
+            bgmUrl: scene.bgm,
             subtitle: subtitlesResponses[index].data.trim()
         }));
 
@@ -109,8 +110,6 @@ onMounted(async () => {
     } catch (error) {
         console.error('Error fetching images:', error);
     }
-    
-    storyStore.clearStory();
 });
 
 function setupAudioHandlers() {
@@ -125,6 +124,18 @@ function setupAudioHandlers() {
             }
         });
         image.audio = audio;
+
+        
+        const bgm = new Audio(image.bgmUrl);
+        bgm.addEventListener('loadedmetadata', () => {
+            image.duration = bgm.duration * 1000; // Duration in milliseconds
+        });
+        bgm.addEventListener('ended', () => {
+            if (activeIndex.value === index) {
+                nextSlide();
+            }
+        });
+        image.bgm = bgm;
     });
 }
 
@@ -137,6 +148,9 @@ const nextSlide = () => {
     if (images.value[activeIndex.value].audio) {
         images.value[activeIndex.value].audio.pause(); // Pause current audio
     }
+    if (images.value[activeIndex.value].bgm) {
+        images.value[activeIndex.value].bgm.pause(); // Pause current audio
+    }
     const nextIndex = activeIndex.value + 1;
     if (nextIndex < images.value.length) {
         activeIndex.value = nextIndex;
@@ -146,16 +160,39 @@ const nextSlide = () => {
     }
 };
 
+
 const playAudioForCurrentSlide = () => {
+    const playMedia = (media) => {
+        if (media) {
+            const playPromise = media.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Playback started successfully
+                }).catch(error => {
+                    console.error('Error occurred during playback:', error);
+                    media.pause(); // Attempt to reset the state
+                });
+            }
+        }
+    };
+
     if (images.value[activeIndex.value].audio) {
-        images.value[activeIndex.value].audio.play();
-        transitionInterval.value = images.value[activeIndex.value].duration || 3000;
+        images.value[activeIndex.value].audio.pause();
+        setTimeout(() => playMedia(images.value[activeIndex.value].audio), 100);
+    }
+
+    if (images.value[activeIndex.value].bgm) {
+        images.value[activeIndex.value].bgm.pause();
+        setTimeout(() => playMedia(images.value[activeIndex.value].bgm), 100);
     }
 };
 
 watch(activeIndex, (newValue, oldValue) => {
     if (oldValue !== undefined && images.value[oldValue]?.audio) {
         images.value[oldValue].audio.pause(); // Ensure audio from previous slide is paused
+    }
+    if (oldValue !== undefined && images.value[oldValue]?.bgm) {
+        images.value[oldValue].bgm.pause(); // Ensure audio from previous slide is paused
     }
     if (hasStarted.value) {
         playAudioForCurrentSlide();
@@ -165,6 +202,9 @@ watch(activeIndex, (newValue, oldValue) => {
 onUnmounted(() => {
     if (images.value[activeIndex.value].audio) {
         images.value[activeIndex.value].audio.pause(); // Ensure audio is paused when component is destroyed
+    }
+    if (images.value[activeIndex.value].bgm) {
+        images.value[activeIndex.value].bgm.pause(); // Ensure audio is paused when component is destroyed
     }
 });
 
@@ -209,6 +249,9 @@ const toggleAutoSlide = () => {
     } else {
         if (images.value[activeIndex.value].audio) {
             images.value[activeIndex.value].audio.pause();
+        }
+        if (images.value[activeIndex.value].bgm) {
+            images.value[activeIndex.value].bgm.pause();
         }
     }
 };

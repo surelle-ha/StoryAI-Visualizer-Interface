@@ -4,7 +4,9 @@ import axios from 'axios';
 export const useStoryStore = defineStore('storyStore', {
     state: () => ({
         access_id: localStorage.getItem('access_id') || null,
+        access_name: localStorage.getItem('access_name') || null,
         story_id: localStorage.getItem('story_id') || null,
+        story_name: localStorage.getItem('story_name') || null,
         chapter_id: localStorage.getItem('chapter_id') || null,
         chapter_title: localStorage.getItem('chapter_title') || null,
         isAuthor: localStorage.getItem('isAuthor') === 'true', // Assuming isAuthor and isAdmin are booleans
@@ -15,7 +17,7 @@ export const useStoryStore = defineStore('storyStore', {
     }),
     getters: {
         isValid: (state) => {
-            return state.access_id !== null && state.story_id !== null && state.chapter_id !== null;
+            return state.access_id !== null && state.story_id !== null;
         }
     },
     actions: {
@@ -23,9 +25,17 @@ export const useStoryStore = defineStore('storyStore', {
             this.access_id = id;
             localStorage.setItem('access_id', id);
         },
+        updateAccessName(name) {
+            this.access_name = name;
+            localStorage.setItem('access_name', name);
+        },
         updateStoryId(id) {
             this.story_id = id;
             localStorage.setItem('story_id', id);
+        },
+        updateStoryName(name) {
+            this.story_name = name;
+            localStorage.setItem('story_name', name);
         },
         updateChapterId(id) {
             this.chapter_id = id;
@@ -51,7 +61,7 @@ export const useStoryStore = defineStore('storyStore', {
             this.access_line = line;
             localStorage.setItem('access_line', line);
         },
-        async initializeStory(accessId, storyId, chapterId, chapterTitle, isAuthor, isAdmin, accessLine) {
+        async initializeStory(accessId, accessName, storyId, storyName, chapterId, chapterTitle, isAuthor, isAdmin, accessLine) {
             try {
                 const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/story/initialize`, {
                     access_id: accessId,
@@ -61,7 +71,9 @@ export const useStoryStore = defineStore('storyStore', {
                 console.log('points: '+accessLine)
                 if (response.data.status === 'success') {
                     this.updateAccessId(accessId);
+                    this.updateAccessName(accessName);
                     this.updateStoryId(storyId);
+                    this.updateStoryName(storyName);
                     this.updateChapterId(chapterId);
                     this.updateChapterTitle(chapterTitle);
                     this.updateAuthor(isAuthor);
@@ -79,7 +91,9 @@ export const useStoryStore = defineStore('storyStore', {
         },
         clearStory() {
             localStorage.removeItem('access_id');
+            localStorage.removeItem('access_name');
             localStorage.removeItem('story_id');
+            localStorage.removeItem('story_name');
             localStorage.removeItem('chapter_id');
             localStorage.removeItem('chapter_title');
             localStorage.removeItem('isAuthor');

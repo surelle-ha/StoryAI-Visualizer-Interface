@@ -7,6 +7,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@globalhive/vuejs-tour": "^1.6.0",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@toruslabs/eccrypto": "^4.0.0",
     "@vueuse/integrations": "^10.9.0",
@@ -16,6 +17,7 @@
     "date-fns": "^3.6.0",
     "firebase": "^10.10.0",
     "jwt-decode": "^3.1.2",
+    "loadash": "^1.0.0",
     "md5": "^2.3.0",
     "mitt": "^3.0.1",
     "pinia": "^2.1.7",
@@ -27,6 +29,7 @@
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vue-toast-notification": "^3.1.2",
+    "vue-tour": "^2.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

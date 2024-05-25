@@ -1,5 +1,7 @@
 <template>
-	<Card style="width: 25rem; overflow: hidden">
+	<Card
+		:style="`width: ${100 / settingsStore.column_number}rem; overflow: hidden`"
+	>
 		{{ scene }}
 		<template #header>
 			<Image alt="Image" class="header-image" preview>
@@ -7,9 +9,49 @@
 					<i class="pi pi-search"></i>
 				</template>
 				<template #image>
-					<img :src="imageUrl" class="header-image" alt="image" />
-					<Tag :icon="audioSrc && imageUrl != 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' && subtitle != 'No Content Available' ? 'pi pi-check' : 'pi pi-info'" :severity="audioSrc && imageUrl != 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' && subtitle != 'No Content Available' ? 'success' : 'warning'" class="absolute" style="height: 25px; left:7px; top: 7px;opacity: 0.7;"/>
-					<Tag v-if="audioSrc" :value="audioLength" severity="contrast" class="absolute" style="height: 25px; left:36px; top: 7px;opacity: 0.7;"/>
+					<div
+						style="
+							background-color: transparent;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+						"
+					>
+						<img
+							:src="imageUrl"
+							class="header-image"
+							alt="image"
+							style="background-size: contain; width: 500px; max-width: 100%;border-radius: 10px;"
+						/>
+					</div>
+
+					<Tag
+						:icon="
+							audioSrc &&
+							imageUrl !=
+								'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' &&
+							subtitle != 'No Content Available'
+								? 'pi pi-check'
+								: 'pi pi-info'
+						"
+						:severity="
+							audioSrc &&
+							imageUrl !=
+								'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png' &&
+							subtitle != 'No Content Available'
+								? 'success'
+								: 'warning'
+						"
+						class="absolute"
+						style="height: 25px; left: 7px; top: 7px; opacity: 0.7"
+					/>
+					<Tag
+						v-if="audioSrc"
+						:value="audioLength"
+						severity="contrast"
+						class="absolute"
+						style="height: 25px; left: 36px; top: 7px; opacity: 0.7"
+					/>
 				</template>
 				<template #preview="slotProps">
 					<img
@@ -22,24 +64,32 @@
 			</Image>
 		</template>
 		<template #title>
-			<span style="font-family: 'Roboto Slab', serif; letter-spacing: 2px;font-size:18px" v-if="storyStore.isValid">{{
-				title
-			}}</span>
-			<Button
-				@click="displayContent = !displayContent"
-				icon="pi pi-book"
-				label="View Content"
-				class="ml-4 mr-2 custom-small-button"
-				v-if="storyStore.isValid"
+			<SplitButton
+				:label="title"
+				severity="secondary"
+				@click="save"
+				class="mr-2 custom-small-button"
+				:model="[
+					{
+						label: 'View Content',
+						disabled: !storyStore.isValid,
+						command: () => displayContent = !displayContent,
+					},
+					{
+						label: 'Play Narration',
+						disabled: !audioSrc,
+						command: playAudio,
+					},
+					{
+						label: 'Play BGM',
+						disabled: !bgmSrc,
+						command: playBGM,
+					},
+				]"
 			/>
-			<Button
-				@click="playAudio"
-				v-if="audioSrc"
-				icon="pi pi-volume-up"
-				:label="buttonLabel"
-				class="custom-small-button"
-			/>
+
 			<audio ref="audioPlayer" :src="audioSrc" hidden v-if="audioSrc"></audio>
+			<audio ref="bgmPlayer" :src="bgmSrc" hidden v-if="bgmSrc"></audio>
 		</template>
 		<template #subtitle>
 			<span v-html="subtitle" v-if="!storyStore.isValid"></span>
@@ -76,6 +126,7 @@
 					:scene_content="subtitle"
 					:scene_prompt="content"
 					:scene_withAudio="audioSrc != null"
+					:scene_withBGM="bgmSrc != null"
 					:scene_withImage="
 						imageUrl !=
 						'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png'
@@ -95,6 +146,7 @@ import axios from "axios";
 import { useToast } from "primevue/usetoast";
 import { useStoryStore } from "@/stores/storyStore";
 import { useAudioStore } from "@/stores/audioStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 import ChapterItemMenu from "./ChapterItemMenu.vue";
 
@@ -108,8 +160,11 @@ export default {
 	setup(props) {
 		const toast = useToast();
 		const storyStore = useStoryStore();
+		const settingsStore = useSettingsStore();
 		const audioStore = useAudioStore();
 		const emitter = inject("emitter");
+		const bgmPlayer = ref(null);
+		const bgmSrc = ref(null);
 		const audioPlayer = ref(null);
 		const audioSrc = ref(null);
 		const audioLength = ref(null);
@@ -118,7 +173,7 @@ export default {
 		const buttonLabel = ref("Audio Available");
 
 		const story_id = props.story_id;
-		const chapter_id = props.chapter_id; 
+		const chapter_id = props.chapter_id;
 		const scene = props.scenario.replace("Scene_", "");
 
 		const title = ref("Loading Title");
@@ -145,9 +200,9 @@ export default {
 			}
 		};
 
-        watch(content, (newValue, oldValue) => {
-            console.log(`Content updated from ${oldValue} to ${newValue}`);
-        });
+		watch(content, (newValue, oldValue) => {
+			console.log(`Content updated from ${oldValue} to ${newValue}`);
+		});
 
 		const fetchScenePrompt = async () => {
 			try {
@@ -175,7 +230,8 @@ export default {
 					audioSrc.value = response.config.url;
 					const audio = new Audio(audioSrc.value);
 					audio.onloadedmetadata = () => {
-						audioLength.value = (Math.round(audio.duration * 100) / 100).toFixed(2) + "s";
+						audioLength.value =
+							(Math.round(audio.duration * 100) / 100).toFixed(2) + "s";
 					};
 				} else {
 					audioSrc.value = null;
@@ -186,8 +242,44 @@ export default {
 			}
 		};
 
+		const fetchBGMUrl = async () => {
+			try {
+				const response = await axios.get(
+					`${process.env.VUE_APP_BACKEND_API_URL}/api/scene/bgm/fetch?story_id=${story_id}&chapter_id=${chapter_id}&scene_id=${scene}`
+				);
+				if (response.data) {
+					bgmSrc.value = response.config.url;
+					const audio = new Audio(bgmSrc.value);
+					audio.onloadedmetadata = () => {
+						audioLength.value =
+							(Math.round(audio.duration * 100) / 100).toFixed(2) + "s";
+					};
+				} else {
+					bgmSrc.value = null;
+				}
+				console.log(bgmSrc.value);
+			} catch (error) {
+				bgmSrc.value = null;
+			}
+		};
+
 		const playAudio = () => {
 			const player = audioPlayer.value;
+			if (player) {
+				const currentlyPlaying = audioStore.currentlyPlaying;
+				if (currentlyPlaying && currentlyPlaying !== player) {
+					// Pause the currently playing audio
+					currentlyPlaying.pause();
+					currentlyPlaying.currentTime = 0;
+				}
+				player.play();
+				// Update the Pinia store with the currently playing audio
+				audioStore.currentlyPlaying = player;
+			}
+		};
+
+		const playBGM = () => {
+			const player = bgmPlayer.value;
 			if (player) {
 				const currentlyPlaying = audioStore.currentlyPlaying;
 				if (currentlyPlaying && currentlyPlaying !== player) {
@@ -215,7 +307,9 @@ export default {
 				);
 				console.log(response.data.imageUrl);
 				if (response.data && response.data.imageUrl) {
-					imageUrl.value = `${process.env.VUE_APP_BACKEND_API_URL}${response.data.imageUrl}?unid=${Math.floor(Math.random() * 101)}`;
+					imageUrl.value = `${process.env.VUE_APP_BACKEND_API_URL}${
+						response.data.imageUrl
+					}?unid=${Math.floor(Math.random() * 101)}`;
 				} else {
 					throw new Error("No image URL provided");
 				}
@@ -228,12 +322,16 @@ export default {
 		};
 
 		const updateSceneCard = () => {
+			bgmPlayer.value = null;
+			bgmSrc.value = null;
+
 			audioPlayer.value = null;
 			audioSrc.value = null;
 
 			fetchSceneContent();
 			fetchScenePrompt();
 			fetchAudioUrl();
+			fetchBGMUrl();
 			fetchImage();
 		};
 
@@ -241,6 +339,7 @@ export default {
 			fetchSceneContent();
 			fetchScenePrompt();
 			fetchAudioUrl();
+			fetchBGMUrl();
 			fetchImage();
 
 			title.value = scene
@@ -254,7 +353,7 @@ export default {
 		emitter.on("updateSceneCard", updateSceneCard);
 
 		watch(
-			() => [subtitle.value, content.value, imageUrl.value, audioSrc.value],
+			() => [subtitle.value, content.value, imageUrl.value, audioSrc.value, bgmSrc.value],
 			(newValues, oldValues) => {
 				console.log("Data updated:", newValues);
 			},
@@ -270,12 +369,16 @@ export default {
 			editable,
 			scene,
 			playAudio,
+			playBGM,
+			bgmPlayer,
+			bgmSrc,
 			audioPlayer,
 			audioSrc,
 			displayContent,
 			imageUrl,
 			storyStore,
-			audioLength
+			audioLength,
+			settingsStore,
 		};
 	},
 };

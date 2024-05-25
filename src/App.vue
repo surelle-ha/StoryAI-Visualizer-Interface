@@ -1,22 +1,23 @@
 <template>
 	<Banner />
     <Toast baseZIndex.number="999999" position="bottom-left"/>
-	<Navbar />
+	<Navbar/>
 	<router-view/>
+	<VTour v-if="storyStore.isValid" :steps="tutorial" autoStart/>
 </template>
 
-<script>
+<script setup>
 import Navbar from "./components/Navbar.vue";
 import Banner from "./components/Banner.vue";
-import { usePrimeVue } from 'primevue/config';
+import { useStoryStore } from "./stores/storyStore";
 
-export default {
-	components: {
-		Navbar,
-		Banner
-	},
-	setup() {
-		
-	},
-};
+const storyStore = useStoryStore();
+
+const tutorial = [
+  {
+    target: '#test',
+    content: 'This is the first step',
+  },
+];
+
 </script>

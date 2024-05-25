@@ -192,57 +192,174 @@
 									</div>
 								</div>
 							</OverlayPanel>
+							<OverlayPanel ref="Download_Overlay">
+								<div class="flex flex-column gap-3 w-25rem">
+									<div>
+										<span class="font-medium text-900 block mb-2"
+											>Get This Story</span
+										>
+										<Accordion :activeIndex="0">
+											<AccordionTab header="Download as Book">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															type="button"
+															severity="primary"
+															label="Download as PDF"
+															@click="
+																downloadStoryPDF(
+																	storyStore.story_id,
+																	storyStore.chapter_id
+																)
+															"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+											<AccordionTab header="Download as Video">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															type="button"
+															severity="primary"
+															label="Download as MP4"
+															@click="
+																downloadChapter(
+																	storyStore.story_id,
+																	storyStore.chapter_id
+																)
+															"
+															:loading="isLoading_Downloading"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+											<AccordionTab header="Save URL">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															type="button"
+															severity="primary"
+															label="Save URL"
+															v-tooltip.bottom="{
+																value: 'Copy Chapter',
+																showDelay: 300,
+																hideDelay: 300,
+															}"
+															@click="
+																copyPlayUrl(
+																	storyStore.access_id,
+																	storyStore.story_id,
+																	storyStore.story_name,
+																	storyStore.chapter_id
+																)
+															"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+										</Accordion>
+									</div>
+								</div>
+							</OverlayPanel>
+							<OverlayPanel ref="Settings_Overlay">
+								<div class="flex flex-column gap-3 w-25rem">
+									<div>
+										<span class="font-medium text-900 block mb-2"
+											>Visualizer Settings</span
+										>
+										<Accordion :activeIndex="0">
+											<AccordionTab :header="`Column Count (${columnNumber})`">
+												<Slider
+													v-model="columnNumber"
+													:step="1"
+													:min="1"
+													:max="5"
+													class="w-14rem"
+												/>
+											</AccordionTab>
+										</Accordion>
+									</div>
+								</div>
+							</OverlayPanel>
 						</div>
 
 						<Toolbar
 							:pt="{
 								root: 'border-none',
 							}"
+							id="test"
 						>
 							<template #start>
-                                <Sidebar/>
+								<Sidebar />
+								<Button
+									:icon="`pi ${isDarkMode ? 'pi-moon' : 'pi-sun'}`"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: toggle_darkmode_label,
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggleDarkMode"
+								/>
 								<Button
 									icon="pi pi-user"
 									class="mr-2"
 									severity="secondary"
-                                    v-tooltip.bottom="{ value: 'Admin Panel', showDelay: 300, hideDelay: 300 }"
+									v-tooltip.bottom="{
+										value: 'Admin Panel',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
 									@click="toggle_Admin_Overlay"
 									v-if="isAdmin"
 								/>
 								<Button
-									icon="pi pi-download"
+									icon="pi pi-save"
 									class="mr-2"
 									severity="secondary"
-                                    v-tooltip.bottom="{ value: 'Download Chapter', showDelay: 300, hideDelay: 300 }"
-									@click="
-										downloadChapter(storyStore.story_id, storyStore.chapter_id)
-									"
-									:loading="isLoading_Downloading"
+									v-tooltip.bottom="{
+										value: 'Download Chapter',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggle_Download_Overlay"
 								/>
 								<Button
-									icon="pi pi-link"
+									icon="pi pi-cog"
 									class="mr-2"
 									severity="secondary"
-                                    v-tooltip.bottom="{ value: 'Copy Chapter', showDelay: 300, hideDelay: 300 }"
-									@click="
-										copyPlayUrl(storyStore.story_id, storyStore.chapter_id)
-									"
+									v-tooltip.bottom="{
+										value: 'Chapter Settings',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggle_Settings_Overlay"
 								/>
 								<Button
 									icon="pi pi-sign-out"
 									class="mr-2"
 									severity="secondary"
-                                    v-tooltip.bottom="{ value: 'Signout', showDelay: 300, hideDelay: 300 }"
+									v-tooltip.bottom="{
+										value: 'Signout',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
 									@click="Leave"
 									v-if="storyStore.isValid && access_line === 'Form'"
-									/>
+								/>
 								<Button
 									icon="pi pi-sign-out"
 									severity="secondary"
-                                    v-tooltip.bottom="{ value: 'Signout', showDelay: 300, hideDelay: 300 }"
+									v-tooltip.bottom="{
+										value: 'Signout',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
 									@click="FallbackLeave"
 									v-if="storyStore.isValid && access_line === 'JWT'"
-									/>
+								/>
 							</template>
 						</Toolbar>
 
@@ -257,7 +374,7 @@
 							<div class="flex flex-column gap-3 w-25rem">
 								<div>
 									<span class="font-medium text-900 block mb-2"
-										>Author Account
+										>{{ storyStore.access_name }}
 										<Tag severity="success" :value="'VSID #' + access_id"></Tag
 									></span>
 									<span>AI Tokens: {{ access_points }}</span
@@ -501,53 +618,358 @@
 									</div>
 								</div>
 							</OverlayPanel>
+							<OverlayPanel ref="Admin_Overlay">
+								<div class="flex flex-column gap-3 w-25rem">
+									<div>
+										<span class="font-medium text-900 block mb-2"
+											>Administrative Tools</span
+										>
+										<TabView>
+											<!--
+                                            <TabPanel header="Welcome">
+                                                <div class="surface-section px-4 py-8">
+                                                    <div class="text-700 text-center">
+                                                        <div class="text-blue-600 font-bold mb-3"><i class="pi pi-globe"></i>&nbsp;ADMIN TOOL WIDGET</div>
+                                                        <div class="text-900 font-bold text-5xl mb-3">MAINTENANCE</div>
+                                                        <div class="text-700 text-2xl mb-5">We are still working on this feature.</div>
+                                                        <Button label="( ˘▽˘)っ♨" onclick="alert('COOOOOKING!!')" class="font-bold px-5 py-3 p-button-raised p-button-rounded white-space-nowrap"></Button>
+                                                    </div>
+                                                </div>
+                                            </TabPanel>
+                                            -->
+											<TabPanel header="Statistics">
+												<div class="surface-section py-3">
+													<ul
+														class="list-none p-0 m-0 flex align-items-center font-medium mb-3"
+													>
+														<li>
+															<a
+																class="text-500 no-underline line-height-3 cursor-pointer"
+																>Quick Mode</a
+															>
+														</li>
+													</ul>
+													<div
+														class="flex align-items-start flex-column lg:justify-content-between lg:flex-row"
+													>
+														<div>
+															<div class="font-medium text-3xl text-900">
+																Statistics
+															</div>
+															<div
+																class="flex align-items-center text-700 flex-wrap"
+															>
+																<div class="mr-5 flex align-items-center mt-3">
+																	<i class="pi pi-users mr-2"></i>
+																	<span
+																		v-tooltip.right="
+																			'Since ' + user_count_since
+																		"
+																		placeholder="Left"
+																		>{{ user_count }} Users Created</span
+																	>
+																</div>
+																<div class="mr-5 flex align-items-center mt-3">
+																	<i class="pi pi-book mr-2"></i>
+																	<span
+																		v-tooltip.right="
+																			'Since ' + story_count_since
+																		"
+																		placeholder="Left"
+																		>{{ story_count }} Stories Created</span
+																	>
+																</div>
+																<div class="flex align-items-center mt-3">
+																	<i class="pi pi-image mr-2"></i>
+																	<span
+																		v-tooltip.right="
+																			'Since ' + prompt_count_since
+																		"
+																		placeholder="Left"
+																		>{{ prompt_count }} AI Images
+																		Generated</span
+																	>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</TabPanel>
+											<TabPanel header="Tools">
+												<Accordion :activeIndex="0">
+													<AccordionTab header="User Token Manager">
+														<div class="flex flex-column h-12rem">
+															<FloatLabel
+																class="flex align-items-center gap-3 mb-4 mt-2"
+															>
+																<label
+																	for="access_id"
+																	class="font-semibold w-6rem"
+																	>Access ID</label
+																>
+																<InputText
+																	v-model="admin_token_access_id"
+																	id="access_id"
+																	class="flex-auto"
+																	autocomplete="off"
+																/>
+															</FloatLabel>
+															<FloatLabel
+																class="flex align-items-center gap-3 mb-4 mt-2"
+															>
+																<label
+																	for="admin_token_amount"
+																	class="font-semibold w-6rem"
+																	>Amount</label
+																>
+																<InputText
+																	v-model="admin_token_amount"
+																	id="admin_token_amount"
+																	class="flex-auto"
+																	autocomplete="off"
+																/>
+															</FloatLabel>
+															<div class="flex justify-content-end gap-2">
+																<Button
+																	type="button"
+																	severity="danger"
+																	label="Deduct"
+																	@click="
+																		tokenDeduct(
+																			admin_token_access_id,
+																			admin_token_amount
+																		)
+																	"
+																></Button>
+																<Button
+																	type="button"
+																	severity="success"
+																	label="Add"
+																	@click="
+																		tokenFund(
+																			admin_token_access_id,
+																			admin_token_amount
+																		)
+																	"
+																></Button>
+															</div>
+														</div>
+													</AccordionTab>
+												</Accordion>
+											</TabPanel>
+										</TabView>
+									</div>
+								</div>
+							</OverlayPanel>
+							<OverlayPanel ref="Download_Overlay">
+								<div class="flex flex-column gap-3 w-25rem">
+									<div>
+										<span class="font-medium text-900 block mb-2"
+											>Get This Story</span
+										>
+										<Accordion :activeIndex="0">
+											<AccordionTab header="Download as Book" v-if="route.query.visiting_user != 'guest'">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															v-if="
+																!isPurchased &&
+																route.query.visiting_user != 'guest'
+															"
+															@click="
+																purchaseChapter(
+																	'1',
+																	route.query.visiting_user,
+																	route.query.story_id,
+																	route.query.chapter_id
+																)
+															"
+															icon="pi pi-shop"
+															:label="
+																'Unlock Download for Php ' +
+																(sceneCount * 5 > 100 ? sceneCount * 5 : 100)
+															"
+															:loading="isLoading_Purchasing"
+															class="p-button-sm"
+														/>
+														<Button
+															v-else
+															type="button"
+															severity="primary"
+															label="Download as PDF"
+															@click="downloadStoryPDF(route.query.story_id)"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+											<AccordionTab header="Download as Video" v-if="route.query.visiting_user != 'guest'">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															v-if="
+																!isPurchased &&
+																route.query.visiting_user != 'guest'
+															"
+															@click="
+																purchaseChapter(
+																	'1',
+																	route.query.visiting_user,
+																	route.query.story_id,
+																	route.query.chapter_id
+																)
+															"
+															icon="pi pi-shop"
+															:label="
+																'Unlock Download for Php ' +
+																(sceneCount * 5 > 100 ? sceneCount * 5 : 100)
+															"
+															:loading="isLoading_Purchasing"
+															class="p-button-sm"
+														/>
+														<Button
+															v-else
+															type="button"
+															severity="primary"
+															label="Download as MP4"
+															@click="
+																downloadChapter(
+																	route.query.story_id,
+																	route.query.chapter_id
+																)
+															"
+															:loading="isLoading_Downloading"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+											<AccordionTab header="Save URL">
+												<div class="flex flex-column">
+													<div class="flex justify-content-end gap-2">
+														<Button
+															type="button"
+															severity="primary"
+															label="Save URL"
+															v-tooltip.bottom="{
+																value: 'Copy Chapter',
+																showDelay: 300,
+																hideDelay: 300,
+															}"
+															@click="
+																copyPlayUrl(
+																	route.query.access_id,
+																	route.query.story_id,
+																	route.query.story_title,
+																	route.query.chapter_id
+																)
+															"
+														></Button>
+													</div>
+												</div>
+											</AccordionTab>
+										</Accordion>
+									</div>
+								</div>
+							</OverlayPanel>
+							<OverlayPanel ref="Settings_Overlay">
+								<div class="flex flex-column gap-3 w-25rem">
+									<div>
+										<span class="font-medium text-900 block mb-2"
+											>Visualizer Settings</span
+										>
+										<Accordion :activeIndex="0">
+											<AccordionTab :header="`Column Count (${columnNumber})`">
+												<Slider
+													v-model="columnNumber"
+													:step="1"
+													:min="1"
+													:max="5"
+													class="w-14rem"
+												/>
+											</AccordionTab>
+										</Accordion>
+									</div>
+								</div>
+							</OverlayPanel>
 						</div>
 
-						<Button
-							v-if="!isPurchased && route.query.visiting_user != 'guest'"
-							@click="
-								purchaseChapter(
-									'1',
-									route.query.visiting_user,
-									route.query.story_id,
-									route.query.chapter_id
-								)
-							"
-							icon="pi pi-shop"
-							:label="
-								'Unlock Download for Php ' +
-								(sceneCount * 5 > 100 ? sceneCount * 5 : 100)
-							"
-							:loading="isLoading_Purchasing"
-							class="p-button-sm"
-						/>
-						<Button
-							v-else-if="route.query.visiting_user != 'guest'"
-							@click="
-								downloadChapter(route.query.story_id, route.query.chapter_id)
-							"
-							icon="pi pi-download"
-							class="p-button-sm"
-							label="Download Chapter"
-							:loading="isLoading_Downloading"
-						/>
-						<Button
-							icon="pi pi-link"
-							class="p-button-sm"
-							@click="copyPlayUrl(route.query.story_id, route.query.chapter_id)"
-						/>
-						<Button
-							@click="Leave"
-							v-if="storyStore.isValid && access_line === 'Form'"
-							class="p-button-sm"
-							>Leave</Button
+						<Toolbar
+							:pt="{
+								root: 'border-none',
+							}"
+							id="test"
 						>
-						<Button
-							@click="FallbackLeave"
-							v-if="storyStore.isValid && access_line === 'JWT'"
-							class="p-button-sm"
-							>Go Back to Home</Button
-						>
+							<template #start>
+								<Sidebar />
+								<Button
+									:icon="`pi ${isDarkMode ? 'pi-moon' : 'pi-sun'}`"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: toggle_darkmode_label,
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggleDarkMode"
+								/>
+								<Button
+									icon="pi pi-user"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Admin Panel',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggle_Admin_Overlay"
+									v-if="isAdmin"
+								/>
+								<Button
+									icon="pi pi-save"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Download Chapter',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggle_Download_Overlay"
+								/>
+								<Button
+									icon="pi pi-cog"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Chapter Settings',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="toggle_Settings_Overlay"
+								/>
+								<Button
+									icon="pi pi-sign-out"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Signout',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="Leave"
+									v-if="storyStore.isValid && access_line === 'Form'"
+								/>
+								<Button
+									icon="pi pi-sign-out"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Signout',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="FallbackLeave"
+									v-if="storyStore.isValid && access_line === 'JWT'"
+								/>
+							</template>
+						</Toolbar>
 
 						<OverlayPanel ref="User_Overlay">
 							<div class="flex flex-column gap-3 w-25rem">
@@ -578,17 +1000,21 @@
 <script setup>
 import { inject, ref, watch, onMounted, computed } from "vue";
 import { useStoryStore } from "@/stores/storyStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useRoute, useRouter } from "vue-router";
 import { usePrimeVue } from "primevue/config";
 import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import Sidebar from "@/components/Sidebar.vue";
+import Column from "primevue/column";
 
 const emitter = inject("emitter");
 const storyStore = useStoryStore();
+const settingsStore = useSettingsStore();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const PrimeVue = usePrimeVue();
 
 const access_id = computed(() => storyStore.access_id);
 const story_id = computed(() => storyStore.story_id);
@@ -618,7 +1044,44 @@ const isLoading_Downloading = ref(false);
 console.log("line", access_line.value);
 
 const Admin_Overlay = ref();
+const Download_Overlay = ref();
+const Settings_Overlay = ref();
 const User_Overlay = ref();
+
+const columnNumber = ref(settingsStore.column_number);
+
+watch(columnNumber, (newValue) => {
+	settingsStore.updateColumnNumber(newValue);
+});
+
+const isDarkMode = ref(false); 
+const toggle_darkmode_label = ref("Toggle Dark Mode");
+
+const initializeDarkMode = () => {
+    const storedDarkMode = localStorage.getItem('dark_mode');
+    if (storedDarkMode !== null) {
+        isDarkMode.value = storedDarkMode === 'true';
+    }
+    if (isDarkMode.value) {
+        toggle_darkmode_label.value = "Toggle Light Mode";
+        PrimeVue.changeTheme('aura-light-noir', 'aura-dark-noir', 'theme-link', () => {});
+    } else {
+        toggle_darkmode_label.value = "Toggle Dark Mode";
+        PrimeVue.changeTheme('aura-dark-noir', 'aura-light-noir', 'theme-link', () => {});
+    }
+}
+
+const toggleDarkMode = () => {
+    isDarkMode.value = !isDarkMode.value;
+    localStorage.setItem('dark_mode', isDarkMode.value);
+    if (isDarkMode.value) {
+        toggle_darkmode_label.value = "Toggle Light Mode";
+        PrimeVue.changeTheme('aura-light-noir', 'aura-dark-noir', 'theme-link', () => {});
+    } else {
+        toggle_darkmode_label.value = "Toggle Dark Mode";
+        PrimeVue.changeTheme('aura-dark-noir', 'aura-light-noir', 'theme-link', () => {});
+    }
+}
 
 const Leave = () => {
 	storyStore.clearStory();
@@ -658,7 +1121,7 @@ const items = computed(() => [
 		route: "admin",
 		icon: "pi pi-lock",
 		actionType: "route",
-		show: storyStore.isAdmin,
+		show: storyStore.isAdmin && false,
 	},
 	{
 		label: "Storyboard",
@@ -716,12 +1179,12 @@ const getSceneCount = async (story_id, chapter_id) => {
 	sceneCount.value = response.data.scenes.length;
 };
 
-const copyPlayUrl = async (story_id, chapter_id) => {
+const copyPlayUrl = async (access_id, story_id, story_title, chapter_id) => {
 	try {
 		await navigator.clipboard.writeText(
 			`${window.location.protocol}//${window.location.hostname}${
 				window.location.port ? ":" + window.location.port : ""
-			}/storyboard?visiting_user=guest&story_id=${story_id}&chapter_id=${chapter_id}`
+			}/storyboard?visiting_user=guest&access_id=${access_id}&story_id=${story_id}&story_title=${story_title}&chapter_id=${chapter_id}`
 		);
 		toast.add({
 			severity: "info",
@@ -891,10 +1354,61 @@ const purchaseChapter = async (
 	}, 600000);
 };
 
+const downloadStoryPDF = async (story_id, story_title) => {
+	isLoading_Downloading.value = true;
+	try {
+		const response = await axios.post(
+			`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/v1/create-pdf`,
+			{
+				story_id: story_id,
+				story_title: story_title,
+				column_number: settingsStore.column_number
+			},
+			{
+				responseType: "blob",
+			}
+		);
+
+		const url = window.URL.createObjectURL(new Blob([response.data]));
+		const filename = `story_${story_id}_${story_title}.pdf`;
+
+		// Automatically initiate the download
+		const link = document.createElement("a");
+		link.href = url;
+		link.setAttribute("download", filename);
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+
+		isLoading_Downloading.value = false;
+		toast.add({
+			severity: "success",
+			summary: "Download Started",
+			detail: "The PDF download has started.",
+			life: 3000,
+		});
+	} catch (error) {
+		isLoading_Downloading.value = false;
+		console.log("Download response error", error);
+		toast.add({
+			severity: "error",
+			summary: "PDF Generation Error",
+			detail: "Failed to generate the PDF.",
+			life: 3000,
+		});
+		toast.add({
+			severity: "error",
+			summary: "PDF Generation Error Cause",
+			detail: error.message,
+			life: 3000,
+		});
+	}
+};
+
 const downloadChapter = async (story_id, chapter_id) => {
 	isLoading_Downloading.value = true;
 	await axios
-		.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/video/generate`, {
+		.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/video/v2/generate`, {
 			story_id: story_id,
 			chapter_id: chapter_id,
 		})
@@ -1018,6 +1532,7 @@ const get_prompt_count = async () => {
 };
 
 onMounted(() => {
+	initializeDarkMode();
 	setTimeout(async () => {
 		console.log(
 			"Query Params:",
@@ -1051,6 +1566,12 @@ onMounted(() => {
 
 const toggle_Admin_Overlay = (event) => {
 	Admin_Overlay.value.toggle(event);
+};
+const toggle_Download_Overlay = (event) => {
+	Download_Overlay.value.toggle(event);
+};
+const toggle_Settings_Overlay = (event) => {
+	Settings_Overlay.value.toggle(event);
 };
 const toggle_User_Overlay = (event) => {
 	User_Overlay.value.toggle(event);

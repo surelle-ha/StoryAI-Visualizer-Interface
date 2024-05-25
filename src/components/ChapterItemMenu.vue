@@ -53,6 +53,10 @@
             <LocalFileUpload :scene_id="scene_id"/>
         </Dialog>
 
+        <Dialog v-model:visible="displayUploadBGMusic" modal header="Upload Background Music" :style="{ width: '50rem' }">
+            <LocalBGMUpload :scene_id="scene_id"/>
+        </Dialog>
+
         <Dialog v-model:visible="displaySelectImage" modal header="Select From AI Images" :style="{ width: '90rem' }">
             <SelectImageUpload :scene_id="scene_id"/>
         </Dialog>
@@ -128,6 +132,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useStoryStore } from "@/stores/storyStore";
 import LocalFileUpload from "@/components/LocalFileUpload.vue"
+import LocalBGMUpload from "@/components/LocalBGMUpload.vue"
 import SelectImageUpload from "@/components/SelectImageUpload.vue"
 
 const storyStore = useStoryStore();
@@ -139,6 +144,7 @@ const props = defineProps({
     scene_content: String,
     scene_prompt: String,
     scene_withAudio: Boolean,
+    scene_withBGM: Boolean,
     scene_withImage: Boolean
 })
 
@@ -351,6 +357,39 @@ const saveScenePremiumNarrate = async () => {
         },
         reject: () => {
             toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'Narration generation cancelled', life: 3000 });
+        }
+    });
+};
+
+const deleteBGM = async () => {
+    confirm.require({
+        message: 'Are you sure you want to delete BGM?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        rejectLabel: 'No',
+        acceptLabel: 'Yes',
+        accept: async () => {
+            isLoading.value = true;
+            await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/bgm/delete`, 
+            { 
+                story_id: storyStore.story_id, 
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id
+            })
+            .then(response => {
+                emitter.emit('updateSceneCard', response);
+                toast.add({ severity: 'info', summary: 'Deleted', detail: 'You deleted a BGM..', life: 3000 });
+            })
+            .catch(error => {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong: ' + error, life: 3000 });
+            });
+            setTimeout(() => {
+                    isLoading.value = false;
+            }, 1000);
+        },
+        reject: () => {
+            toast.add({ severity: 'warn', summary: 'Cancelled', detail: 'BGM delete cancelled', life: 3000 });
         }
     });
 };
@@ -617,6 +656,23 @@ const items = computed(() => ([
             }
         ]
     },
+    {
+        label: 'Others',
+        items: [
+            {
+                label: 'Upload BGM',
+                icon: 'pi pi-star',
+                command: () => { displayUploadBGMusic.value = true },
+                disabled: false
+            },
+            {
+                label: 'Clear BGM',
+                icon: 'pi pi-trash',
+                command: deleteBGM,
+                disabled: !props.scene_withBGM
+            }
+        ]
+    },
 ]));
 
 onMounted(() => {
@@ -629,6 +685,7 @@ onMounted(() => {
 const displayEditContent = ref(false);
 const displayEditPrompt = ref(false);
 const displayUploadImage = ref(false)
+const displayUploadBGMusic = ref(false)
 const displaySelectImage = ref(false)
 const displayPremiumNarration = ref(false)
 const displayPremiumImage = ref(false)

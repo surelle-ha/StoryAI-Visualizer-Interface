@@ -1,7 +1,8 @@
 import "primeflex/primeflex.css";
-import "primevue/resources/themes/aura-light-noir/theme.css";
 import "primevue/resources/primevue.min.css"; /* Deprecated */
 import "primeicons/primeicons.css";
+import VueJsTour from '@globalhive/vuejs-tour';
+import '@globalhive/vuejs-tour/dist/style.css';
 
 import { createApp } from "vue";
 import { createPinia } from 'pinia';
@@ -129,6 +130,7 @@ app.use(ToastService);
 app.use(DialogService);
 app.use(pinia);
 app.use(router);
+app.use(VueJsTour);
 
 app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);
