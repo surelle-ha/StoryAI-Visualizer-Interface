@@ -48,39 +48,86 @@
 									<i class="pi pi-chevron-down"></i>
 								</div>
 								<ul class="list-none p-0 m-0 overflow-hidden">
-									<li v-for="item in chapterList.chapters" :key="item">
+									<li v-for="item in chapterList.chapters" :key="item.chapter">
 										<a
 											v-ripple
+											v-styleclass="{
+												selector: '@next',
+												enterClass: 'hidden',
+												enterActiveClass: 'slidedown',
+												leaveToClass: 'hidden',
+												leaveActiveClass: 'slideup',
+											}"
 											class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple"
 										>
 											<i class="pi pi-bookmark mr-2"></i>
 											<span
 												class="font-medium"
-												@click="switchChapter(item)"
+												@click="switchChapter(item.chapter)"
 												v-if="storyStore.isValid"
-												>{{ item.replace("_", " ") }}</span
+												>{{ item.chapter.replace("_", " ") }}</span
 											>
 											<span
 												class="font-medium"
-												@click="forceSwitchChapter(item)"
+												@click="forceSwitchChapter(item.chapter)"
 												v-else
-												>{{ item.replace("_", " ") }}</span
+												>{{ item.chapter.replace("_", " ") }}</span
 											>
 
 											<span
 												v-if="storyStore.isValid"
-												@click="deleteChapter(item.replace('Chapter_', ''))"
+												@click="
+													deleteChapter(item.chapter.replace('Chapter_', ''))
+												"
 												class="inline-flex align-items-center justify-content-center ml-auto bg-primary border-circle"
 												style="min-width: 1.5rem; height: 1.5rem"
 												><i class="pi pi-trash"></i
 											></span>
 										</a>
+										<ul
+											class="list-none py-0 pl-3 pr-0 m-0 overflow-y-hidden transition-all transition-duration-400 transition-ease-in-out"
+										>
+											<li
+												v-for="scene in item.scenes"
+												:key="item.chapter + '_' + scene"
+											>
+												<a
+													v-ripple
+													class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple"
+												>
+													<i class="pi pi-table mr-2"></i>
+													<span
+														class="font-medium"
+														@click="switchChapter(item.chapter)"
+														v-if="storyStore.isValid"
+														>{{ scene.replace("_", " ") }}</span
+													>
+													<span
+														class="font-medium"
+														@click="forceSwitchChapter(item.chapter)"
+														v-else
+														>{{ item.chapter.replace("_", " ") }}</span
+													>
+												</a>
+											</li>
+											<li v-if="storyStore.isValid">
+												<a
+													v-ripple
+													@click="newScene(item.chapter.replace('Chapter_', ''))"
+													style="background: rgb(11,11,11,0.1);color:black;"
+													class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple"
+												>
+													<i class="pi pi-plus mr-2"></i>
+													<span class="font-medium">Add Scene</span>
+												</a>
+											</li>
+										</ul>
 									</li>
 									<li v-if="storyStore.isValid">
 										<a
 											v-ripple
 											@click="newChapter"
-											style="background: whitesmoke"
+											style="background: rgb(11,11,11,0.1);color:black;"
 											class="flex align-items-center cursor-pointer p-3 border-round text-700 hover:surface-100 transition-duration-150 transition-colors p-ripple"
 										>
 											<i class="pi pi-plus mr-2"></i>
@@ -155,18 +202,22 @@ const forceSwitchChapter = (item) => {
 };
 
 const getChapterList = async () => {
-    try {
-        const response = await axios.post(
-            `${process.env.VUE_APP_BACKEND_API_URL}/api/story/select`,
-            {
-                access_id: storyStore.isValid ? storyStore.access_id : String(route.query.access_id),
-                story_id: storyStore.isValid ? storyStore.story_id : Number(route.query.story_id),
-            }
-        );
-        chapterList.value = response.data;
-    } catch (err) {
-        console.error("Error initializing story:", err.message);
-    }
+	try {
+		const response = await axios.post(
+			`${process.env.VUE_APP_BACKEND_API_URL}/api/story/select`,
+			{
+				access_id: storyStore.isValid
+					? storyStore.access_id
+					: String(route.query.access_id),
+				story_id: storyStore.isValid
+					? storyStore.story_id
+					: Number(route.query.story_id),
+			}
+		);
+		chapterList.value = response.data;
+	} catch (err) {
+		console.error("Error initializing story:", err.message);
+	}
 };
 
 const newChapter = async () => {
@@ -175,6 +226,54 @@ const newChapter = async () => {
 	const url = `${process.env.VUE_APP_BACKEND_API_URL}/api/chapter/initialize`;
 	const payload = {
 		story_id: storyStore.story_id,
+	};
+
+	try {
+		const response = await fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+		});
+
+		if (!response.ok) {
+			toast.add({
+				severity: "error",
+				summary: "Failed",
+				detail: "Error during scene creation.",
+				life: 3000,
+			});
+			throw new Error("Failed to initialize new scene");
+		}
+
+		const data = await response.json();
+		toast.add({
+			severity: "info",
+			summary: "Success",
+			detail: "Successfully added scene.",
+			life: 3000,
+		});
+
+		getChapterList();
+	} catch (error) {
+		console.error("Error during scene initialization:", error);
+		toast.add({
+			severity: "error",
+			summary: "Failed",
+			detail: "Error during scene creation.",
+			life: 3000,
+		});
+	}
+};
+
+const newScene = async (chapter_id) => {
+	console.log("New Scene function called");
+
+	const url = `${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/initialize`;
+	const payload = {
+		story_id: storyStore.story_id,
+      	chapter_id: chapter_id
 	};
 
 	try {
@@ -267,7 +366,6 @@ const deleteChapter = async (chapter) => {
 onMounted(() => {
 	setTimeout(() => {
 		getChapterList();
-	}, 1000)
-	
+	}, 1000);
 });
 </script>

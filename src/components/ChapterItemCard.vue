@@ -21,7 +21,12 @@
 							:src="imageUrl"
 							class="header-image"
 							alt="image"
-							style="background-size: contain; width: 500px; max-width: 100%;border-radius: 10px;"
+							style="
+								background-size: contain;
+								width: 500px;
+								max-width: 100%;
+								border-radius: 10px;
+							"
 						/>
 					</div>
 
@@ -63,64 +68,37 @@
 				</template>
 			</Image>
 		</template>
-		<template #title>
-			<SplitButton
-				:label="title"
-				severity="secondary"
-				@click="save"
-				class="mr-2 custom-small-button"
-				:model="[
-					{
-						label: 'View Content',
-						disabled: !storyStore.isValid,
-						command: () => displayContent = !displayContent,
-					},
-					{
-						label: 'Play Narration',
-						disabled: !audioSrc,
-						command: playAudio,
-					},
-					{
-						label: 'Play BGM',
-						disabled: !bgmSrc,
-						command: playBGM,
-					},
-				]"
-			/>
-
-			<audio ref="audioPlayer" :src="audioSrc" hidden v-if="audioSrc"></audio>
-			<audio ref="bgmPlayer" :src="bgmSrc" hidden v-if="bgmSrc"></audio>
-		</template>
-		<template #subtitle>
-			<span v-html="subtitle" v-if="!storyStore.isValid"></span>
-			<Dialog
-				v-model:visible="displayContent"
-				modal
-				:header="title"
-				style="font-family: 'Roboto Slab', serif"
-				:style="{ width: '50rem' }"
-				:breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-			>
-				<Button
-					@click="playAudio"
-					v-if="audioSrc"
-					icon="pi pi-volume-up"
-					:label="buttonLabel"
-					class="custom-small-button"
-				/>
-				<span v-html="subtitle"></span>
-			</Dialog>
-		</template>
 		<template #content>
-			<p class="m-0 truncate" v-if="storyStore.isValid">
-				{{ content }}
-			</p>
+			<Fieldset :legend="title">
+				<p class="m-0">
+					<span v-html="subtitle"></span>
+				</p>
+			</Fieldset>
 		</template>
 		<template #footer v-if="storyStore.isAuthor">
-			<div class="flex gap-3 mt-1" v-if="editable">
-				<Button label="Edit" class="w-full" @click="editable = !editable" />
-			</div>
-			<div class="flex gap-3 mt-1" v-else>
+			<div class="flex gap-1 mt-1">
+				<SplitButton
+					label="Scenario Assets"
+					@click="save"
+					class="mr-2 custom-small-button"
+					:model="[
+						{
+							label: 'View Content',
+							disabled: !storyStore.isValid,
+							command: () => (displayContent = !displayContent),
+						},
+						{
+							label: 'Play Narration',
+							disabled: !audioSrc,
+							command: playAudio,
+						},
+						{
+							label: 'Play BGM',
+							disabled: !bgmSrc,
+							command: playBGM,
+						},
+					]"
+				/>
 				<ChapterItemMenu
 					:scene_id="scene"
 					:scene_content="subtitle"
@@ -132,7 +110,8 @@
 						'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png'
 					"
 				/>
-				<Button label="Save" class="w-full" @click="editable = !editable" />
+				<audio ref="audioPlayer" :src="audioSrc" hidden v-if="audioSrc"></audio>
+				<audio ref="bgmPlayer" :src="bgmSrc" hidden v-if="bgmSrc"></audio>
 			</div>
 		</template>
 	</Card>
@@ -353,7 +332,13 @@ export default {
 		emitter.on("updateSceneCard", updateSceneCard);
 
 		watch(
-			() => [subtitle.value, content.value, imageUrl.value, audioSrc.value, bgmSrc.value],
+			() => [
+				subtitle.value,
+				content.value,
+				imageUrl.value,
+				audioSrc.value,
+				bgmSrc.value,
+			],
 			(newValues, oldValues) => {
 				console.log("Data updated:", newValues);
 			},

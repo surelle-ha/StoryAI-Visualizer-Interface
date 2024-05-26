@@ -20,7 +20,7 @@
             </div>
         </Dialog>
 
-        <Button type="button" icon="pi pi-cog" label="Manage" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"/>
+        <Button type="button" icon="pi pi-cog" label="Manage" style="margin-top: 3px;height:40px;" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"/>
         <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
 
         <Dialog v-model:visible="displayEditContent" :modal="true" header="Edit Scenario" :style="{ width: '40rem' }">
