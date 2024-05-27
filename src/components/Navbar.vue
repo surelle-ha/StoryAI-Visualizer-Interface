@@ -1128,8 +1128,12 @@ const items = computed(() => [
 		route:
 			"storyboard?visiting_user=" +
 			route.query.visiting_user +
+			"&access_id=" +
+			route.query.access_id +
 			"&story_id=" +
 			route.query.story_id +
+			"&story_title=" +
+			route.query.story_title +
 			"&chapter_id=" +
 			route.query.chapter_id,
 		icon: "pi pi-star",
@@ -1141,8 +1145,12 @@ const items = computed(() => [
 		route:
 			"watch?visiting_user=" +
 			route.query.visiting_user +
+			"&access_id=" +
+			route.query.access_id +
 			"&story_id=" +
 			route.query.story_id +
+			"&story_title=" +
+			route.query.story_title +
 			"&chapter_id=" +
 			route.query.chapter_id,
 		icon: "pi pi-star",
