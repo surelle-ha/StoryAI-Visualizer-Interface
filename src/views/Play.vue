@@ -31,6 +31,7 @@
                     <div v-html="images[activeIndex].subtitle"></div>
                 </div>
                 <div class="image-container">
+                    <FilterOverlay :scene_id="slotProps.item.scene_id"/>
                     <img class="image-content" :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" :style="[{ width: !fullScreen ? '70%' : '', display: !fullScreen ? 'block' : '' }] + 'width:1200px;'" />
                 </div>
                 
@@ -64,6 +65,7 @@
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import axios from 'axios';
 import { useStoryStore } from "@/stores/storyStore";
+import FilterOverlay from "@/components/FilterOverlay.vue";
 
 const galleria = ref();
 const images = ref([]);
@@ -82,7 +84,11 @@ onMounted(async () => {
         const response = await axios.post(`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/v2/fetch`, { story_id: story_id.value, chapter_id: chapter_id.value });
         const fetchSubtitlesPromises = Object.values(response.data).map(scene => axios.get(scene.context));
         const subtitlesResponses = await Promise.all(fetchSubtitlesPromises);
+        console.log('assetcollection', response.data);
         images.value = Object.values(response.data).map((scene, index) => ({
+            story_id: scene.story_id,
+            chapter_id: scene.chapter_id,
+            scene_id: scene.scene_id,
             itemImageSrc: scene.image,
             thumbnailImageSrc: scene.image,
             alt: 'Scene image',

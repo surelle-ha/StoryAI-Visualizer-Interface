@@ -16,7 +16,9 @@
 							justify-content: center;
 							align-items: center;
 						"
-					>
+					>	
+					
+						<FilterOverlay :scene_id="scene"/>
 						<img
 							:src="imageUrl"
 							class="header-image"
@@ -48,14 +50,14 @@
 								: 'warning'
 						"
 						class="absolute"
-						style="height: 25px; left: 7px; top: 7px; opacity: 0.7"
+						style="height: 25px; left: 7px; top: 7px; opacity: 1;z-index: 1000"
 					/>
 					<Tag
 						v-if="audioSrc"
 						:value="audioLength"
 						severity="contrast"
 						class="absolute"
-						style="height: 25px; left: 36px; top: 7px; opacity: 0.7"
+						style="height: 25px; left: 36px; top: 7px; opacity: 1;z-index: 1000"
 					/>
 				</template>
 				<template #preview="slotProps">
@@ -128,9 +130,10 @@ import { useAudioStore } from "@/stores/audioStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 import ChapterItemMenu from "./ChapterItemMenu.vue";
+import FilterOverlay from "./FilterOverlay.vue";
 
 export default {
-	components: { Card, Button, ChapterItemMenu },
+	components: { Card, Button, ChapterItemMenu, FilterOverlay },
 	props: {
 		story_id: String,
 		chapter_id: String,
@@ -150,6 +153,7 @@ export default {
 		const imageUrl = ref(null);
 		const displayContent = ref(false);
 		const buttonLabel = ref("Audio Available");
+		const displayFilterManager = ref(false);
 
 		const story_id = props.story_id;
 		const chapter_id = props.chapter_id;
@@ -364,6 +368,7 @@ export default {
 			storyStore,
 			audioLength,
 			settingsStore,
+			displayFilterManager
 		};
 	},
 };

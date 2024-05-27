@@ -122,6 +122,10 @@
             </div>
         </Dialog>
 
+        <Dialog v-model:visible="displayFilterManager" modal header="Filter and Overlay Manager" :style="{ width: '40rem' }">
+            <FilterOverlay type="manager"/>
+        </Dialog>
+
     </div>
 </template>
 
@@ -134,6 +138,7 @@ import { useStoryStore } from "@/stores/storyStore";
 import LocalFileUpload from "@/components/LocalFileUpload.vue"
 import LocalBGMUpload from "@/components/LocalBGMUpload.vue"
 import SelectImageUpload from "@/components/SelectImageUpload.vue"
+import FilterOverlay from "@/components/FilterOverlay.vue"
 
 const storyStore = useStoryStore();
 const emitter = inject('emitter');
@@ -666,6 +671,12 @@ const items = computed(() => ([
                 disabled: false
             },
             {
+                label: 'Manage Filters and Overlay',
+                icon: 'pi pi-wand',
+                command: () => { displayFilterManager.value = true },
+                disabled: false
+            },
+            {
                 label: 'Clear BGM',
                 icon: 'pi pi-trash',
                 command: deleteBGM,
@@ -677,9 +688,13 @@ const items = computed(() => ([
 
 onMounted(() => {
     fetchVoices();
-    console.log(props.scene_prompt)
-    scenario_content.value = props.scene_content;
-    scenario_prompt.value = props.scene_prompt;
+
+    setTimeout(() => {
+        console.log(props.scene_prompt)
+        scenario_content.value = props.scene_content;
+        scenario_prompt.value = props.scene_prompt;
+    }, 1000)
+    
 })
 
 const displayEditContent = ref(false);
@@ -689,6 +704,7 @@ const displayUploadBGMusic = ref(false)
 const displaySelectImage = ref(false)
 const displayPremiumNarration = ref(false)
 const displayPremiumImage = ref(false)
+const displayFilterManager = ref(false)
 
 const previewEditor = ref(true)
 
