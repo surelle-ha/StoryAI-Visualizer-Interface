@@ -7,8 +7,34 @@
 		:style="{ width: '75rem' }"
 	>
 		<Stepper>
-			<StepperPanel header="Step 1">
+			<StepperPanel header="Welcome">
 				<template #content="{ nextCallback }">
+					<div class="flex flex-column h-25rem">
+						<Panel>
+							<div class="flex justify-content-center gap-6">
+								<div style="text-align: center;margin-top: -30px;">
+									<img src="https://64.media.tumblr.com/116c77d969e3c334de736e6e496d3279/tumblr_p1bo6rLBjM1v1b8nao1_540.gifv" style="width: 300px;">
+									<h3 style="margin-top: -20px;">Welcome To Pahina Visualizer</h3>
+									<div style="width:45rem">
+										<p style="margin-top: -10px;">Unlock the full potential of your stories with Pahina Visualizer, where AI brings your words to life. Dive into a world where every narrative is enhanced with captivating AI-generated images and narrations. Experience storytelling like never before—crafted by you, powered by AI.</p>
+									</div>
+								</div>
+								
+							</div>
+						</Panel>
+					</div>
+					<div class="flex pt-4 justify-content-end">
+						<Button
+							label="Next"
+							icon="pi pi-arrow-right"
+							iconPos="right"
+							@click="nextCallback"
+						/>
+					</div>
+				</template>
+			</StepperPanel>
+			<StepperPanel header="Step 1">
+				<template #content="{ nextCallback, prevCallback }">
 					<div class="flex flex-column h-25rem">
 						<Panel>
 							<h3 style="margin-top: -20px;">Create Scenario</h3>
@@ -18,7 +44,13 @@
 							</div>
 						</Panel>
 					</div>
-					<div class="flex pt-4 justify-content-end">
+					<div class="flex pt-4 justify-content-between">
+						<Button
+							label="Back"
+							severity="secondary"
+							icon="pi pi-arrow-left"
+							@click="prevCallback"
+						/>
 						<Button
 							label="Next"
 							icon="pi pi-arrow-right"
