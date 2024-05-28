@@ -1,5 +1,4 @@
 <template>
-	<Button @click="tutorialClear" label="Display" style="position: absolute;"/>
 	<Dialog
 		v-model:visible="displayTutorial"
 		v-if="storyStore.isValid"
