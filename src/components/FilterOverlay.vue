@@ -87,6 +87,18 @@ const overlayDetails = {
         filterName: "Glitch 1",
         filterUrl: "https://i.gifer.com/D5XM.gif",
     },
+    10: {
+        filterName: "Stars 1",
+        filterUrl: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzRxczluM3o5YTJ4eWZzajRvbTE1MXl0MmQ3a3owcDU2Y2k5OGJkNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/sWFYgYFjHGugleQdO7/giphy.gif",
+    },
+    11: {
+        filterName: "Space 1",
+        filterUrl: "https://media.giphy.com/media/WWLCZGJ7Kb0ceNBBR7/giphy.gif",
+    },
+    12: {
+        filterName: "Space 2",
+        filterUrl: "https://media.giphy.com/media/c9J6sCu9HrChJUmzWs/giphy.gif",
+    },
 };
 
 const overlays = reactive(Object.keys(overlayDetails).map(id => ({

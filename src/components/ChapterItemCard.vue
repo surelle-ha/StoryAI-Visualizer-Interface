@@ -73,7 +73,7 @@
 		<template #content>
 			<Fieldset :legend="title">
 				<p class="m-0">
-					<span v-html="subtitle"></span>
+					<span v-html="subtitle" style="text-align:justify;"></span>
 				</p>
 			</Fieldset>
 		</template>
