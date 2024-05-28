@@ -15,19 +15,36 @@
 			animationDuration=".5s"
 			aria-label="Loading scenarios"
 		/>
-		<div :class="settingsStore.column_number <= 2 ? 'cards-container-less' : 'cards-container'" :style="settingsStore.column_number == 1 ? 'max-width: 533px' : settingsStore.column_number == 2 ? 'max-width: 1200px' : ''" v-if="scenes.length && !isLoading">
-			<ChapterItemCard
-				class="cardItem"
-				v-for="scene in scenes"
-				:key="scene.id.replace('Scene_', '')"
-				:scenario="scene.id"
-				:story_id="story_id"
-				:chapter_id="chapter_id"
-			/>
-		</div>
-		<div class="cards-container" v-else-if="!isLoading">
-			<Message severity="warn" :closable="false">No Scenario Found</Message>
-		</div>
+
+		<Panel>
+			<div
+				:class="
+					settingsStore.column_number <= 2
+						? 'cards-container-less'
+						: 'cards-container'
+				"
+				:style="
+					settingsStore.column_number == 1
+						? 'max-width: 533px'
+						: settingsStore.column_number == 2
+						? 'max-width: 1200px'
+						: ''
+				"
+				v-if="scenes.length && !isLoading"
+			>
+				<ChapterItemCard
+					class="cardItem"
+					v-for="scene in scenes"
+					:key="scene.id.replace('Scene_', '')"
+					:scenario="scene.id"
+					:story_id="story_id"
+					:chapter_id="chapter_id"
+				/>
+			</div>
+			<div class="cards-container" v-else-if="!isLoading">
+				<Message severity="warn" :closable="false">No Scenario Found</Message>
+			</div>
+		</Panel>
 
 		<FloatMenu class="FloatMenu" @sceneInitialized="fetchScenes" />
 	</div>
@@ -124,7 +141,7 @@ export default {
 			isLoading,
 			story_id,
 			chapter_id,
-			settingsStore
+			settingsStore,
 		};
 	},
 };
@@ -148,8 +165,8 @@ export default {
 }
 
 .cards-container-less .cardItem {
-	flex: 1 1 533px; 
-	max-width: 533px; 
+	flex: 1 1 533px;
+	max-width: 533px;
 }
 
 .container {

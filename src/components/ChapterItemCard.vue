@@ -232,11 +232,6 @@ export default {
 				);
 				if (response.data) {
 					bgmSrc.value = response.config.url;
-					const audio = new Audio(bgmSrc.value);
-					audio.onloadedmetadata = () => {
-						audioLength.value =
-							(Math.round(audio.duration * 100) / 100).toFixed(2) + "s";
-					};
 				} else {
 					bgmSrc.value = null;
 				}
