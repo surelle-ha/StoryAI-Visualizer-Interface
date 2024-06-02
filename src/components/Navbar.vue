@@ -304,6 +304,17 @@
 									@click="toggleDarkMode"
 								/>
 								<Button
+									icon="pi pi-info-circle"
+									class="mr-2"
+									severity="secondary"
+									v-tooltip.bottom="{
+										value: 'Tutorial',
+										showDelay: 300,
+										hideDelay: 300,
+									}"
+									@click="tutorialClear"
+								/>
+								<Button
 									icon="pi pi-user"
 									class="mr-2"
 									severity="secondary"
@@ -1109,6 +1120,10 @@ watch(story_id, (newVal, oldVal) => {
 watch(isAuthor, (newVal, oldVal) => {
 	console.log("isAuthor changed from", oldVal, "to", newVal);
 });
+
+const tutorialClear = () => {
+	emitter.emit('tutorialClear');
+}
 
 const items = computed(() => [
 	{

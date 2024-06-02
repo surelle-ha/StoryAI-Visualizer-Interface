@@ -250,9 +250,10 @@
 import Navbar from "./components/Navbar.vue";
 import Banner from "./components/Banner.vue";
 import { useStoryStore } from "./stores/storyStore";
-import { onMounted, ref } from "vue";
+import { inject, onMounted, ref } from "vue";
 
 const storyStore = useStoryStore();
+const emitter = inject("emitter");
 
 const displayTutorial = ref(false);
 const tutorial = [
@@ -266,6 +267,8 @@ const tutorialClear = () => {
 	displayTutorial.value = true;
 	localStorage.setItem("displayTutorial", null);
 }
+
+emitter.on("tutorialClear", tutorialClear);
 
 const tutorialComplete = () => {
 	displayTutorial.value = false;
