@@ -158,7 +158,7 @@ const isLoading = ref(false)
 const advance_prompt = ref(false);
 const scenario_content = ref('');
 const scenario_prompt = ref('Once upon a time, ...');
-const imageCustomPrompt = ref(`Additional Information:\nArt: {\n\tStyle: ''\n},\nCharacter: [\n\t{\n\t\tName: '',\n\t\tAttribute: ''\n\t}\n],\n `);
+const imageCustomPrompt = ref(``);
 const imageCustomPrompt_disabled = ref(`Visualize a scene from a children's storybook. Design an illustration that brings this scenario to life. Be creative and capture the essence of a whimsical and engaging story for kids.`);
 
 const combinedImageCustomPrompt = computed(()=>(`${imageCustomPrompt_disabled.value}\n\n${imageCustomPrompt.value}\n\nStory Scene:  ${scenario_prompt.value}`))
@@ -191,6 +191,23 @@ watch(selected_engine, (newEngine) => {
     }
     selected_size.value = null;  
 });
+
+const AdjustPosition = async (position) => {
+    try {
+        await axios.post(
+            `${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/adjust/position/${position}`,
+            {
+                story_id: storyStore.story_id,
+                chapter_id: storyStore.chapter_id,
+                scene_id: props.scene_id,
+            }
+        );
+        location.reload();
+        toast.add({ severity: 'success', summary: 'Scenario position changed', detail: 'You adjusted your scenario position.', life: 3000 });
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Failed to move scenario', detail: 'Something went wrong and we are unable to move your scenes position.', life: 3000 });
+    }
+}
 
 const saveSceneContent = async () => {
     isLoading.value = true;
@@ -658,6 +675,21 @@ const items = computed(() => ([
                 icon: 'pi pi-trash',
                 command: deleteNarration,
                 disabled: !props.scene_withAudio
+            }
+        ]
+    },
+    {
+        label: 'Position',
+        items: [
+            {
+                label: 'Move to Left',
+                icon: 'pi pi-arrow-left',
+                command: () => { AdjustPosition('left') }
+            },
+            {
+                label: 'Move to Right',
+                icon: 'pi pi-arrow-right',
+                command: () => { AdjustPosition('right') }
             }
         ]
     },

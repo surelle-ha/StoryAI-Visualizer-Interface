@@ -40,7 +40,7 @@
 					</div>
 				</template>
 			</StepperPanel>
-			<StepperPanel header="Step 1">
+			<StepperPanel header="Create Scenario">
 				<template #content="{ nextCallback, prevCallback }">
 					<div class="flex flex-column h-25rem">
 						<Panel>
@@ -67,7 +67,7 @@
 					</div>
 				</template>
 			</StepperPanel>
-			<StepperPanel header="Step 2">
+			<StepperPanel header="Update Content">
 				<template #content="{ prevCallback, nextCallback }">
 					<div class="flex flex-column h-25rem">
 						<Panel>
@@ -94,7 +94,7 @@
 					</div>
 				</template>
 			</StepperPanel>
-      <StepperPanel header="Step 3">
+      <StepperPanel header="Update Prompt">
 				<template #content="{ prevCallback, nextCallback }">
 					<div class="flex flex-column h-25rem">
 						<Panel>
@@ -121,14 +121,16 @@
 					</div>
 				</template>
 			</StepperPanel>
-      <StepperPanel header="Add Image">
+      <StepperPanel header="Generate Narration">
 				<template #content="{ prevCallback, nextCallback }">
-					<div class="flex flex-column h-12rem">
-						<div
-							class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium"
-						>
-							Content II
-						</div>
+					<div class="flex flex-column h-25rem">
+						<Panel>
+							<h3 style="margin-top: -20px;">Generate Narration</h3>
+							<p style="margin-top: -10px;">To add narration, press the Manage button and press Generate Free AI Narration. This will create a narration for your content using gTTS engine.</p>
+							<div class="flex justify-content-center">
+								<img src="tutorial-resources/Generate-Narration.gif" style="border: 1px solid black;">
+							</div>
+						</Panel>
 					</div>
 					<div class="flex pt-4 justify-content-between">
 						<Button
@@ -146,14 +148,16 @@
 					</div>
 				</template>
 			</StepperPanel>
-      <StepperPanel header="Add Image">
+      <StepperPanel header="Generate AI Image">
 				<template #content="{ prevCallback, nextCallback }">
-					<div class="flex flex-column h-12rem">
-						<div
-							class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium"
-						>
-							Content II
-						</div>
+					<div class="flex flex-column h-25rem">
+						<Panel>
+							<h3 style="margin-top: -20px;">Generate AI Image</h3>
+							<p style="margin-top: -10px;">To generate AI Image, press Manage button then Generate AI Image. This will display a Prompt builder. Be creative while creating the prompt then select image engine and resolution. Press Save and wait.</p>
+							<div class="flex justify-content-center">
+								<img src="tutorial-resources/Generate-Image.gif" style="border: 1px solid black;">
+							</div>
+						</Panel>
 					</div>
 					<div class="flex pt-4 justify-content-between">
 						<Button
@@ -171,14 +175,16 @@
 					</div>
 				</template>
 			</StepperPanel>
-      <StepperPanel header="Add Image">
+      <StepperPanel header="Add Image SFX">
 				<template #content="{ prevCallback, nextCallback }">
-					<div class="flex flex-column h-12rem">
-						<div
-							class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium"
-						>
-							Content II
-						</div>
+					<div class="flex flex-column h-25rem">
+						<Panel>
+							<h3 style="margin-top: -20px;">Add SFX to Image</h3>
+							<p style="margin-top: -10px;">To Add effects on your image, press the filter on the upper right then select the effects you want to apply.</p>
+							<div class="flex justify-content-center">
+								<img src="tutorial-resources/Add-Effects.gif" style="border: 1px solid black;">
+							</div>
+						</Panel>
 					</div>
 					<div class="flex pt-4 justify-content-between">
 						<Button
@@ -199,12 +205,20 @@
 
 			<StepperPanel header="Add Narration">
 				<template #content="{ prevCallback }">
-					<div class="flex flex-column h-12rem">
-						<div
-							class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium"
-						>
-							Content III
-						</div>
+					<div class="flex flex-column h-25rem">
+						<Panel>
+							<div class="flex justify-content-center gap-6">
+								<div style="text-align: center;margin-top: -30px;">
+									<img src="https://i.pinimg.com/originals/c6/77/ea/c677eafcd7c9c8778da398e40ac3c1e6.gif" style="width: 300px;">
+									<!-- https://i.pinimg.com/originals/c6/77/ea/c677eafcd7c9c8778da398e40ac3c1e6.gif -->
+									<h3 style="margin-top: -20px;">Again, Welcome To Pahina Visualizer</h3>
+									<div style="width:45rem">
+										<p style="margin-top: -10px;">Enjoy!</p>
+									</div>
+								</div>
+								
+							</div>
+						</Panel>
 					</div>
 					<div class="flex pt-4 justify-content-between">
 						<Button

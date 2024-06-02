@@ -1,5 +1,5 @@
 <template>
-	<div class="container p-5">
+	<div class="container p-5" id="downloadChapter">
 		<ProgressSpinner
 			v-if="isLoading"
 			style="

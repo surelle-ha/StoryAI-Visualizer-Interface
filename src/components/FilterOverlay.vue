@@ -99,6 +99,26 @@ const overlayDetails = {
         filterName: "Space 2",
         filterUrl: "https://media.giphy.com/media/c9J6sCu9HrChJUmzWs/giphy.gif",
     },
+    13: {
+        filterName: "Shining 1",
+        filterUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGFwZHV5ZjU1cWVrbGxoMTEzbzRybTJmeTVmemZmb3F3NGk4NHNsZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gh3XZakO9hs2Xbk3xH/giphy.gif"
+    },
+    14: {
+        filterName: "Shining 2",
+        filterUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2Nicmh1aGU0cmRwaWprNWp3MnMyd21ybWZzaXQwYXZtdTh0bGwxNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/12zxWWVMXNDOy4/giphy.gif"
+    },
+    15: {
+        filterName: "Constellation 1",
+        filterUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2VqYnAwZHY2cmI2bWg4dGtyYjFuODQ2ODFqeG8waThjamN4ZmQ2YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/J1XqkN1hsfqtErgpl4/giphy.gif"
+    },
+    16: {
+        filterName: "Snow Fall 1",
+        filterUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHAxcWY5ZGtjZTlkMGRhMHBpdW1udDk5dGVoa2J5d2Y4NTdlamdvcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/VBYU3oDGeDPZ7W8R0K/giphy.gif"
+    },
+    17: {
+        filterName: "Confetti 1",
+        filterUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2djc3poY3V0YWd0NjRra2R0NXd0Mm1nNHpiYWE4a2l5MjZhcnFiMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/GsKEigUSgdrlBvMkzV/giphy.gif"
+    },
 };
 
 const overlays = reactive(Object.keys(overlayDetails).map(id => ({

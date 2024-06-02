@@ -5,28 +5,30 @@
         </div>
 		<div class="px-7 py-1 flex gap-3">
 			<div class="col-8">
-				<Panel header="Transactions">
-					<DataTable :value="products" tableStyle="min-width: 50rem">
-						<Column
-							v-for="col of columns"
-							:key="col.field"
-							:field="col.field"
-							:header="col.header"
-						></Column>
-					</DataTable>
+				<Panel :header="`Transactions (${transactions.length})`">
+						<DataTable :value="transactions" tableStyle="min-width: 50rem" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]">
+							<Column
+								v-for="col of columns"
+								:key="col.field"
+								:field="col.field"
+								:header="col.header"
+								sortable
+								style="width: 25%"
+							></Column>
+						</DataTable>
 				</Panel>
 			</div>
 			<div class="col">
 				<Panel header="Audit Trails">
 					<ScrollPanel style="width: 100%; height: 270px; max-height: 270px;">
-						<Timeline :value="events">
+						<Timeline :value="prompts">
 							<template #opposite="slotProps">
 								<small class="p-text-secondary">{{
-									slotProps.item.date
+									slotProps.item.created
 								}}</small>
 							</template>
 							<template #content="slotProps">
-								{{ slotProps.item.status }}
+								User ID {{ formatHash(slotProps.item.access_id) }} Prompted At Story {{ slotProps.item.story_id }} - Chapter {{ slotProps.item.chapter_id }}
 							</template>
 						</Timeline>
 					</ScrollPanel>
@@ -50,129 +52,111 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import axios from "axios";
 import { ProductService } from "@/service/ProductService";
 
+const transactions = ref([]);
+const prompts = ref([]);
+const chartData = ref(setChartData());
+const chartOptions = ref(setChartOptions());
+
+const formatHash = hash => hash.length <= 10 ? hash : `${hash.substring(0, 4)}.....${hash.substring(hash.length - 4)}`;
+
+const getAllTransactions = async () => {
+	const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/asset/transactions`);
+	console.log(response)
+	transactions.value = response.data;
+	const dataPerMonth = processData(transactions.value);
+	updateChartData(dataPerMonth);
+}
+
+const getAllPromptEvents = async () => {
+	const response = await axios.get(`${process.env.VUE_APP_BACKEND_API_URL}/api/statistics/prompt/all`);
+	prompts.value = response.data.data;
+}
+
 onMounted(() => {
-	ProductService.getProductsMini().then((data) => (products.value = data));
-	chartData.value = setChartData();
-	chartOptions.value = setChartOptions();
+	getAllTransactions();
+	getAllPromptEvents();
 });
 
-const chartData = ref();
-const chartOptions = ref();
-// Timeline
-const events = ref([
-	{
-		status: "Ordered",
-		date: "15/10/2020 10:30",
-		icon: "pi pi-shopping-cart",
-		color: "#9C27B0",
-	},
-	{
-		status: "Processing",
-		date: "15/10/2020 14:00",
-		icon: "pi pi-cog",
-		color: "#673AB7",
-	},
-	{
-		status: "Shipped",
-		date: "15/10/2020 16:15",
-		icon: "pi pi-shopping-cart",
-		color: "#FF9800",
-	},
-	{
-		status: "Delivered",
-		date: "16/10/2020 10:00",
-		icon: "pi pi-check",
-		color: "#607D8B",
-	},
-    {
-		status: "Delivered",
-		date: "16/10/2020 10:00",
-		icon: "pi pi-check",
-		color: "#607D8B",
-	},
-    {
-		status: "Delivered",
-		date: "16/10/2020 10:00",
-		icon: "pi pi-check",
-		color: "#607D8B",
-	},
-]);
-
 // Transactions
-const products = ref();
 const columns = [
-	{ field: "code", header: "Code" },
-	{ field: "name", header: "Name" },
-	{ field: "category", header: "Category" },
-	{ field: "quantity", header: "Quantity" },
+	{ field: "_id", header: "Transaction ID" },
+	{ field: "story_id", header: "Story ID" },
+	{ field: "purchase_by", header: "Purchase By" },
+	{ field: "createdAt", header: "Date" },
 ];
 
-// Chart
-const setChartData = () => {
-	const documentStyle = getComputedStyle(document.documentElement);
+function processData(transactions) {
+    const counts = Array(12).fill(0); // Assuming transactions for one year
+    transactions.forEach(transaction => {
+        const month = new Date(transaction.updated).getMonth(); // getMonth() is zero-indexed
+        counts[month]++;
+    });
+    return counts;
+}
 
-	return {
-		labels: ["January", "February", "March", "April", "May", "June", "July"],
-		datasets: [
-			{
-				label: "My First dataset",
-				backgroundColor: documentStyle.getPropertyValue("--cyan-500"),
-				borderColor: documentStyle.getPropertyValue("--cyan-500"),
-				data: [65, 59, 80, 81, 56, 55, 40],
-			},
-			{
-				label: "My Second dataset",
-				backgroundColor: documentStyle.getPropertyValue("--gray-500"),
-				borderColor: documentStyle.getPropertyValue("--gray-500"),
-				data: [28, 48, 40, 19, 86, 27, 90],
-			},
-		],
-	};
-};
-const setChartOptions = () => {
-	const documentStyle = getComputedStyle(document.documentElement);
-	const textColor = documentStyle.getPropertyValue("--text-color");
-	const textColorSecondary = documentStyle.getPropertyValue(
-		"--text-color-secondary"
-	);
-	const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
+function updateChartData(dataPerMonth) {
+    chartData.value.labels = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    chartData.value.datasets[0].data = dataPerMonth; // Update the dataset for transactions
+}
 
-	return {
-		indexAxis: "y",
-		maintainAspectRatio: false,
-		aspectRatio: 0.8,
-		plugins: {
-			legend: {
-				labels: {
-					color: textColor,
-				},
-			},
-		},
-		scales: {
-			x: {
-				ticks: {
-					color: textColorSecondary,
-					font: {
-						weight: 500,
-					},
-				},
-				grid: {
-					display: false,
-					drawBorder: false,
-				},
-			},
-			y: {
-				ticks: {
-					color: textColorSecondary,
-				},
-				grid: {
-					color: surfaceBorder,
-					drawBorder: false,
-				},
-			},
-		},
-	};
-};
+function setChartData() {
+    const documentStyle = getComputedStyle(document.documentElement);
+    return {
+        labels: [], // Labels will be set when data is loaded
+        datasets: [
+            {
+                label: "Monthly Transactions",
+                backgroundColor: documentStyle.getPropertyValue("--cyan-500"),
+                borderColor: documentStyle.getPropertyValue("--cyan-500"),
+                data: [], // Data will be set when transactions are loaded
+            },
+        ],
+    };
+}
+
+function setChartOptions() {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue("--text-color");
+    const textColorSecondary = documentStyle.getPropertyValue("--text-color-secondary");
+    const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
+
+    return {
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        aspectRatio: 0.8,
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor,
+                },
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary,
+                    font: {
+                        weight: 500,
+                    },
+                },
+                grid: {
+                    display: false,
+                    drawBorder: false,
+                },
+            },
+            y: {
+                ticks: {
+                    color: textColorSecondary,
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false,
+                },
+            },
+        },
+    };
+}
 </script>

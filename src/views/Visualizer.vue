@@ -1,5 +1,5 @@
 <template>
-	<div class="container p-5">
+	<div class="container p-5" id="downloadChapter">
 		<div class="card flex justify-content-center">
 			<h1
 				class="w-100 flex-justify-center"
@@ -67,6 +67,7 @@ import { useStoryStore } from "@/stores/storyStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import draggable from 'vuedraggable';
 
 export default {
 	name: "Visualizer",
@@ -158,6 +159,7 @@ export default {
 		emitter.on("fetchScenes", fetchScenes);
 
 		return {
+			emitter,
 			scenes,
 			fetchScenes,
 			isLoading,

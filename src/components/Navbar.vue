@@ -1007,6 +1007,8 @@ import { useToast } from "primevue/usetoast";
 import axios from "axios";
 import Sidebar from "@/components/Sidebar.vue";
 import Column from "primevue/column";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const emitter = inject("emitter");
 const storyStore = useStoryStore();
@@ -1121,7 +1123,7 @@ const items = computed(() => [
 		route: "admin",
 		icon: "pi pi-lock",
 		actionType: "route",
-		show: storyStore.isAdmin && false,
+		show: storyStore.isAdmin,
 	},
 	{
 		label: "Storyboard",
@@ -1365,29 +1367,57 @@ const purchaseChapter = async (
 const downloadStoryPDF = async (story_id, story_title) => {
 	isLoading_Downloading.value = true;
 	try {
-		const response = await axios.post(
-			`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/v1/create-pdf`,
-			{
-				story_id: story_id,
-				story_title: story_title,
-				column_number: settingsStore.column_number
-			},
-			{
-				responseType: "blob",
-			}
-		);
+		const element = document.getElementById('downloadChapter');
 
-		const url = window.URL.createObjectURL(new Blob([response.data]));
-		const filename = `story_${story_id}_${story_title}.pdf`;
+		// Ensure all images are fully loaded
+		await Promise.all(Array.from(element.getElementsByTagName('img')).map(img => {
+		if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+		return new Promise((resolve, reject) => {
+			img.onload = resolve;
+			img.onerror = reject;
+		});
+		}));
 
-		// Automatically initiate the download
-		const link = document.createElement("a");
-		link.href = url;
-		link.setAttribute("download", filename);
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+		const canvas = await html2canvas(element, {
+		scale: 5, // Adjusts the resolution of the canvas
+		useCORS: true // This might help with CORS-related issues
+		});
 
+		const imgData = canvas.toDataURL('image/png');
+		const pdf = new jsPDF({
+		orientation: 'l',
+		unit: 'px',
+		format: [canvas.width, canvas.height]
+		});
+
+		pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+		pdf.save(`story_${story_id}_download.pdf`);
+
+		if(false){
+			const response = await axios.post(
+				`${process.env.VUE_APP_BACKEND_API_URL}/api/scenario/complete/v1/create-pdf`,
+				{
+					story_id: story_id,
+					story_title: story_title,
+					column_number: settingsStore.column_number
+				},
+				{
+					responseType: "blob",
+				}
+			);
+
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const filename = `story_${story_id}_${story_title}.pdf`;
+
+			// Automatically initiate the download
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", filename);
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+		
 		isLoading_Downloading.value = false;
 		toast.add({
 			severity: "success",
