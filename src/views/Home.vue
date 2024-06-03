@@ -155,6 +155,7 @@ onMounted(() => {
         access_name.value = decodedJwt.value.payload.access_name,
         story_id.value = decodedJwt.value.payload.story_id,
         story_name.value = decodedJwt.value.payload.story_name,
+        chapter_title.value = decodedJwt.value.payload.chapter_title,
         isAuthor.value = decodedJwt.value.payload.isAuthor,
         isAdmin.value = decodedJwt.value.payload.isAdmin
 
